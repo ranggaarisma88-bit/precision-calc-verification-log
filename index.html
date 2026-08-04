@@ -7,7 +7,7 @@
     <title>Precision Calc & Verification Log</title>
 
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#050505">
+    <meta name="theme-color" content="#0d0d0d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Precision Calc">
@@ -26,65 +26,65 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
 
     <style>
-        :root { --bg: #050505; --card: #111; --gold: #d4af37; --green: #00ff41; --blue: #00d4ff; --red: #ff3b30; --orange: #ff9500; --yellow: #ffcc00; --input: #181818; --border2: #333; --text3: #666; }
+        :root { --bg: #0d0d0d; --card: #1a1a1a; --gold: #c9a830; --green: #00ff41; --blue: #00d4ff; --red: #ff3b30; --orange: #ff9500; --yellow: #ffcc00; --input: #242424; --border2: #333; --text3: #888; --text1: #e0e0e0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #000; color: #f0f0f0; padding: 12px; display: flex; justify-content: center; }
-        .app-container { background: var(--card); width: 100%; max-width: 540px; border-radius: 28px; border: 1px solid #333; overflow: hidden; padding-bottom: 20px; box-shadow: 0 10px 50px #000; }
-        .shared-header { background: #000; padding: 22px 20px; text-align: center; border-bottom: 3px solid var(--gold); border-top-left-radius: 28px; border-top-right-radius: 28px; }
-        .shared-header .brand { font-size: 16px; font-weight: 900; letter-spacing: 2px; color: #fff; text-transform: uppercase; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text1); padding: 12px; display: flex; justify-content: center; }
+        .app-container { background: var(--card); width: 100%; max-width: 540px; border-radius: 28px; border: 1px solid #2a2a2a; overflow: hidden; padding-bottom: 20px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
+        .shared-header { background: #111; padding: 22px 20px; text-align: center; border-bottom: 2px solid var(--gold); border-top-left-radius: 28px; border-top-right-radius: 28px; }
+        .shared-header .brand { font-size: 16px; font-weight: 900; letter-spacing: 2px; color: #e8e8e8; text-transform: uppercase; }
         .shared-header .sub-brand { font-size: 11px; color: var(--gold); font-weight: bold; letter-spacing: 5px; margin-top: 5px; }
-        .shared-header .lightning { font-size: 20px; color: var(--gold); margin-top: 8px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(212,175,55,0.4); animation: pulse 2s infinite; }
+        .shared-header .lightning { font-size: 20px; color: var(--gold); margin-top: 8px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(201,168,48,0.3); animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        .tab-nav { display: flex; background: #0a0a0a; border-bottom: 1px solid #222; }
-        .tab-btn { flex: 1; padding: 14px 8px; background: transparent; border: none; color: #555; font-size: 11px; font-weight: 900; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.3s; position: relative; }
+        .tab-nav { display: flex; background: #141414; border-bottom: 1px solid #2a2a2a; }
+        .tab-btn { flex: 1; padding: 14px 8px; background: transparent; border: none; color: #666; font-size: 11px; font-weight: 900; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.3s; position: relative; }
         .tab-btn.active { color: var(--gold); }
         .tab-btn.active::after { content: ""; position: absolute; bottom: 0; left: 20%; width: 60%; height: 3px; background: var(--gold); border-radius: 3px 3px 0 0; }
         .tab-content { display: none; padding: 16px; }
         .tab-content.active { display: block; }
 
         .calc-section-title { font-size: 9px; font-weight: 900; color: var(--gold); margin: 18px 0 10px; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
-        .calc-section-title::after { content: ""; flex: 1; height: 2px; background: linear-gradient(90deg, rgba(212,175,55,0.6), transparent); }
+        .calc-section-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(201,168,48,0.4), transparent); }
         .calc-action-indicator { text-align: center; font-size: 7px; color: var(--gold); margin-top: 4px; letter-spacing: 1px; opacity: 0.7; font-style: italic; }
         .calc-row { display: flex; gap: 8px; margin-bottom: 8px; }
         .calc-col { flex: 1; text-align: center; }
         .calc-col-2 { flex: 2; text-align: center; }
-        .calc-label { font-size: 7px; color: #777; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 1px; font-weight: 600; }
-        .calc-input, .calc-select { width: 100%; padding: 12px; border-radius: 9px; font-size: 14px; text-align: center; background: var(--input); color: #fff; border: 1px solid #333; outline: none; font-family: 'Consolas', monospace; }
+        .calc-label { font-size: 7px; color: var(--text3); text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 1px; font-weight: 600; }
+        .calc-input, .calc-select { width: 100%; padding: 12px; border-radius: 9px; font-size: 14px; text-align: center; background: var(--input); color: var(--text1); border: 1px solid #2a2a2a; outline: none; font-family: 'Consolas', monospace; }
         .calc-input:focus, .calc-select:focus { border-color: var(--gold); }
-        .calc-dot-bg { background-image: radial-gradient(#333 0.8px, transparent 0.8px); background-size: 5px 5px; background-color: #0c0c0c; }
-        .calc-sim-box { background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 10px; margin: 0 0 14px 0; }
+        .calc-dot-bg { background-image: radial-gradient(#333 0.8px, transparent 0.8px); background-size: 5px 5px; background-color: var(--input); }
+        .calc-sim-box { background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 10px; margin: 0 0 14px 0; }
         .calc-sim-row { display: flex; align-items: center; gap: 8px; }
         .calc-sim-row-top { margin-bottom: 3px; }
-        .calc-sim-label { font-size: 7px; font-weight: 800; color: #555; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; width: 42px; text-align: center; }
+        .calc-sim-label { font-size: 7px; font-weight: 800; color: #666; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; width: 42px; text-align: center; }
         .calc-sim-led { width: 11px; height: 11px; border-radius: 50%; transition: all 0.3s; }
-        .calc-sim-led.normal { background: var(--green); box-shadow: 0 0 8px rgba(0,255,65,0.5); }
-        .calc-sim-led.low { background: var(--yellow); box-shadow: 0 0 8px rgba(255,204,0,0.5); }
-        .calc-sim-led.high { background: var(--orange); box-shadow: 0 0 8px rgba(255,149,0,0.5); }
-        .calc-sim-led.fault { background: var(--red); box-shadow: 0 0 12px rgba(255,59,48,0.7); animation: ledBlink 0.5s infinite; }
+        .calc-sim-led.normal { background: var(--green); box-shadow: 0 0 8px rgba(0,255,65,0.4); }
+        .calc-sim-led.low { background: var(--yellow); box-shadow: 0 0 8px rgba(255,204,0,0.4); }
+        .calc-sim-led.high { background: var(--orange); box-shadow: 0 0 8px rgba(255,149,0,0.4); }
+        .calc-sim-led.fault { background: var(--red); box-shadow: 0 0 12px rgba(255,59,48,0.6); animation: ledBlink 0.5s infinite; }
         @keyframes ledBlink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.2;transform:scale(0.7)} }
         .calc-sim-input-wrap { position: relative; flex: 1; }
-        .calc-sim-input-wrap input { width: 100%; margin: 0; border: 2px solid #1a3a4a; background: #0d0d0d; font-size: 15px; font-weight: bold; padding: 11px; }
+        .calc-sim-input-wrap input { width: 100%; margin: 0; border: 2px solid #1a3a4a; background: #1a1a1a; font-size: 15px; font-weight: bold; padding: 11px; }
         .calc-sim-input-wrap input:focus { border-color: var(--blue); }
         .calc-sim-input-wrap .calc-sim-unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--blue); font-weight: 900; font-size: 10px; pointer-events: none; }
-        .calc-sim-row-bottom .calc-sim-input-wrap input { border-color: #ff9500; color: #ff9500; }
-        .calc-sim-row-bottom .calc-sim-unit { color: #ff9500; }
+        .calc-sim-row-bottom .calc-sim-input-wrap input { border-color: #5a3a1a; color: var(--orange); }
+        .calc-sim-row-bottom .calc-sim-unit { color: var(--orange); }
         .calc-damped-display { font-size: 7px; color: #00aa88; text-align: center; margin: 2px 0 5px 0; min-height: 10px; letter-spacing: 0.5px; }
-        .calc-lock-btn { padding: 6px 9px; background: #151515; border: 1px solid #333; border-radius: 6px; color: #666; cursor: pointer; font-size: 13px; font-weight: bold; width: 36px; text-align: center; transition: all 0.2s; }
-        .calc-lock-btn.locked { background: #1a1000; border-color: var(--gold); color: var(--gold); }
-        .calc-plc-panel { background: #000; border: 1px solid #004e66; padding: 12px; border-radius: 10px; display: none; text-align: center; margin-bottom: 10px; }
+        .calc-lock-btn { padding: 6px 9px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: #777; cursor: pointer; font-size: 13px; font-weight: bold; width: 36px; text-align: center; transition: all 0.2s; }
+        .calc-lock-btn.locked { background: #1a1800; border-color: var(--gold); color: var(--gold); }
+        .calc-plc-panel { background: #111; border: 1px solid #1a3a4a; padding: 12px; border-radius: 10px; display: none; text-align: center; margin-bottom: 10px; }
         .calc-plc-val { font-family: 'Consolas', monospace; font-size: 28px; color: var(--blue); font-weight: bold; }
-        .calc-comp-box { background: #0a0f0a; border: 1px solid #1a332a; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: none; }
+        .calc-comp-box { background: #141414; border: 1px solid #1a332a; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: none; }
         .calc-btn-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin: 10px 0 6px 0; }
-        .calc-btn-pct { padding: 13px 0; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 9px; font-size: 10px; color: #888; cursor: pointer; font-weight: 800; font-family: 'Consolas', monospace; display: flex; align-items: center; justify-content: center; }
+        .calc-btn-pct { padding: 13px 0; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 9px; font-size: 10px; color: #999; cursor: pointer; font-weight: 800; font-family: 'Consolas', monospace; display: flex; align-items: center; justify-content: center; }
         .calc-btn-pct.active { background: var(--gold); color: #000; font-weight: 900; border-color: #fff; }
         .calc-btn-pct:disabled { opacity: 0.3; cursor: not-allowed; }
-        .calc-res-box { background: #000; border: 2px solid #00cc33; color: var(--green); font-family: 'Consolas', monospace; font-size: 24px; font-weight: 900; min-height: 60px; border-radius: 14px; text-align: center; width: 100%; margin-top: 8px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 8px; }
+        .calc-res-box { background: #111; border: 2px solid #00cc33; color: var(--green); font-family: 'Consolas', monospace; font-size: 24px; font-weight: 900; min-height: 60px; border-radius: 14px; text-align: center; width: 100%; margin-top: 8px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 8px; }
         .calc-unit-large { font-size: 16px; color: var(--gold); margin-left: 6px; font-weight: 700; }
         .calc-pct-mini { font-size: 10px; color: var(--gold); font-weight: 600; margin-top: 2px; letter-spacing: 1px; opacity: 0.85; }
         .calc-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 10px; color: #aaa; }
-        .calc-th { padding: 10px 5px; background: #0a0a0a; color: #666; font-size: 7px; border-bottom: 2px solid #222; text-transform: uppercase; text-align: center; letter-spacing: 1px; }
-        .calc-td { padding: 10px 5px; border-bottom: 1px solid #151515; text-align: center; font-family: 'Consolas', monospace; }
-        .calc-reset { width: 100%; padding: 15px; background: #0a0000; color: var(--red); border: 2px solid #300; border-radius: 12px; font-weight: 900; margin-top: 18px; cursor: pointer; text-transform: uppercase; letter-spacing: 3px; font-size: 11px; transition: all 0.2s; }
+        .calc-th { padding: 10px 5px; background: #141414; color: #777; font-size: 7px; border-bottom: 2px solid #2a2a2a; text-transform: uppercase; text-align: center; letter-spacing: 1px; }
+        .calc-td { padding: 10px 5px; border-bottom: 1px solid #1e1e1e; text-align: center; font-family: 'Consolas', monospace; }
+        .calc-reset { width: 100%; padding: 15px; background: #0d0000; color: var(--red); border: 2px solid #300; border-radius: 12px; font-weight: 900; margin-top: 18px; cursor: pointer; text-transform: uppercase; letter-spacing: 3px; font-size: 11px; transition: all 0.2s; }
         .calc-reset:hover { background: #1a0000; border-color: #500; }
         .calc-error-msg { font-size: 9px; color: var(--red); text-align: center; margin-top: 4px; display: none; }
         .calc-toggle-mini { user-select: none; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-left: auto; }
@@ -93,27 +93,27 @@
         .calc-toggle-off .calc-toggle-track-mini { background: var(--border2); }
         .calc-toggle-off .calc-toggle-track-mini::after { left: 2px; }
 
-        .log-section-title { font-size: 10px; font-weight: 900; color: #666; margin: 20px 0 10px; padding: 0 0 10px 0; text-transform: uppercase; text-align: left; letter-spacing: 3px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 10px; }
-        .log-section-title::after { content: ""; width: 50px; height: 2px; background: var(--gold); flex-shrink: 0; }
+        .log-section-title { font-size: 10px; font-weight: 900; color: #777; margin: 20px 0 10px; padding: 0 0 10px 0; text-transform: uppercase; text-align: left; letter-spacing: 3px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; gap: 10px; }
+        .log-section-title::after { content: ""; width: 50px; height: 1px; background: var(--gold); flex-shrink: 0; }
         .log-row { display: flex; gap: 8px; margin-bottom: 10px; }
         .log-col { flex: 1; text-align: center; }
-        .log-label { display: block; font-size: 9px; font-weight: bold; color: #777; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        .log-input, .log-select { width: 100%; padding: 14px; border-radius: 10px; font-size: 14px; text-align: center; background: var(--input); color: #fff; border: 1px solid #333; outline: none; font-family: 'Consolas', monospace; }
+        .log-label { display: block; font-size: 9px; font-weight: bold; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .log-input, .log-select { width: 100%; padding: 14px; border-radius: 10px; font-size: 14px; text-align: center; background: var(--input); color: var(--text1); border: 1px solid #2a2a2a; outline: none; font-family: 'Consolas', monospace; }
         .log-input:focus, .log-select:focus { border-color: var(--gold); }
         .log-input[type="date"] { min-height: 45px; font-family: 'Segoe UI', sans-serif; }
-        .log-input:disabled { opacity: 0.4; background: #0a0a0a; }
+        .log-input:disabled { opacity: 0.4; background: #141414; }
         .log-tol-selector-row { display: flex; gap: 8px; margin: 10px 0; }
-        .log-tol-mode-btn { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #666; font-size: 10px; font-weight: 800; cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 1px; }
+        .log-tol-mode-btn { flex: 1; padding: 12px; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; color: #777; font-size: 10px; font-weight: 800; cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 1px; }
         .log-tol-mode-btn.active { background: var(--gold); color: #000; border-color: #fff; }
         .log-tol-input-row { display: flex; gap: 8px; align-items: center; }
         .log-tol-input-col { flex: 1; text-align: center; }
-        .log-tol-unit-display { padding: 14px 8px; background: #0a0a0a; border: 1px solid #333; border-radius: 10px; color: var(--gold); font-weight: bold; font-size: 12px; text-align: center; min-width: 50px; }
-        .log-work-zone { background: #000; border: 1px solid #222; padding: 16px; border-radius: 16px; margin: 10px 0; }
+        .log-tol-unit-display { padding: 14px 8px; background: #141414; border: 1px solid #2a2a2a; border-radius: 10px; color: var(--gold); font-weight: bold; font-size: 12px; text-align: center; min-width: 50px; }
+        .log-work-zone { background: #111; border: 1px solid #2a2a2a; padding: 16px; border-radius: 16px; margin: 10px 0; }
         .log-direction-row, .log-state-row { display: flex; gap: 8px; margin-bottom: 10px; }
-        .log-dir-btn, .log-state-btn { flex: 1; padding: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #666; font-size: 10px; font-weight: 800; cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 1px; }
+        .log-dir-btn, .log-state-btn { flex: 1; padding: 12px; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; color: #777; font-size: 10px; font-weight: 800; cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 1px; }
         .log-dir-btn.active, .log-state-btn.active { background: var(--gold); color: #000; border-color: #fff; }
         .log-state-btn.found-active { background: var(--orange); color: #000; border-color: #fff; }
-        .log-ideal-display { background: #0a0a0a; border: 1px dashed var(--blue); padding: 14px; border-radius: 12px; text-align: center; margin: 10px 0; }
+        .log-ideal-display { background: #141414; border: 1px dashed var(--blue); padding: 14px; border-radius: 12px; text-align: center; margin: 10px 0; }
         .log-ideal-val { font-family: 'Consolas', monospace; font-size: 30px; color: var(--blue); font-weight: bold; letter-spacing: 1px; }
         .log-btn-add, .log-btn-auto { width: 100%; padding: 15px; background: #0056b3; color: white; border: none; border-radius: 14px; font-weight: 800; font-size: 14px; margin-top: 8px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; text-transform: uppercase; }
         .log-btn-add:hover { background: #0066cc; }
@@ -122,25 +122,25 @@
         .log-btn-auto.running { background: #ff9500 !important; color: #000 !important; animation: pulse 1.5s infinite; }
         .log-table-scroll { width: 100%; overflow-x: auto; margin-top: 10px; border-radius: 12px; }
         .log-table { width: 100%; border-collapse: collapse; font-size: 8px; min-width: 520px; }
-        .log-th { padding: 12px 3px; background: #0a0a0a; color: #555; text-transform: uppercase; font-size: 8px; border-bottom: 1px solid #222; letter-spacing: 1px; font-weight: 700; }
-        .log-td { padding: 10px 3px; border-bottom: 1px solid #151515; text-align: center; font-family: 'Consolas', monospace; }
-        .log-btn-del-box { width: 22px; height: 22px; background: #1a1a1a; border: 1px solid #444; color: #888; font-weight: 900; cursor: pointer; border-radius: 6px; font-size: 10px; transition: all 0.2s; }
+        .log-th { padding: 12px 3px; background: #141414; color: #666; text-transform: uppercase; font-size: 8px; border-bottom: 1px solid #2a2a2a; letter-spacing: 1px; font-weight: 700; }
+        .log-td { padding: 10px 3px; border-bottom: 1px solid #1e1e1e; text-align: center; font-family: 'Consolas', monospace; }
+        .log-btn-del-box { width: 22px; height: 22px; background: #1e1e1e; border: 1px solid #444; color: #999; font-weight: 900; cursor: pointer; border-radius: 6px; font-size: 10px; transition: all 0.2s; }
         .log-btn-del-box:hover { background: #300; border-color: var(--red); color: var(--red); }
-        .log-error-chart-container { background: #000; border: 1px solid #333; border-radius: 14px; padding: 12px; margin-top: 15px; }
+        .log-error-chart-container { background: #111; border: 1px solid #2a2a2a; border-radius: 14px; padding: 12px; margin-top: 15px; }
         .log-error-chart-container canvas { width: 100%; height: auto; display: block; border-radius: 8px; }
-        .log-error-legend { display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 9px; font-weight: bold; color: #777; flex-wrap: wrap; }
+        .log-error-legend { display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 9px; font-weight: bold; color: #888; flex-wrap: wrap; }
         .log-error-legend span { display: flex; align-items: center; gap: 5px; }
         .log-legend-dot-up { width: 8px; height: 8px; border-radius: 50%; background: #00d4ff; }
         .log-legend-dot-down { width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; }
         .log-legend-tol-line { width: 16px; height: 0; border-top: 2px dashed #ff9500; }
-        .log-btn-print { width: 100%; padding: 15px; background: #0a1a0a; color: #4ade80; border: 2px solid #1a3a2a; border-radius: 12px; font-weight: 900; margin-top: 20px; cursor: pointer; letter-spacing: 3px; font-size: 11px; transition: all 0.2s; text-transform: uppercase; }
+        .log-btn-print { width: 100%; padding: 15px; background: #0d1a0d; color: #4ade80; border: 2px solid #1a3a2a; border-radius: 12px; font-weight: 900; margin-top: 20px; cursor: pointer; letter-spacing: 3px; font-size: 11px; transition: all 0.2s; text-transform: uppercase; }
         .log-btn-print:hover { background: #1a2a1a; border-color: #2a5a2a; }
-        .log-btn-clear { width: 100%; padding: 12px; background: #0a0a0a; color: #666; border: 1px solid #2a2a2a; border-radius: 10px; margin-top: 8px; font-size: 10px; font-weight: 800; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; transition: all 0.2s; }
-        .log-btn-clear:hover { color: #aaa; border-color: #555; background: #111; }
-        .log-btn-reset-all { width: 100%; padding: 12px; background: #0a0000; color: #ff6b6b; border: 1px solid #300; border-radius: 10px; margin-top: 4px; font-size: 10px; font-weight: 800; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; transition: all 0.2s; }
+        .log-btn-clear { width: 100%; padding: 12px; background: #141414; color: #777; border: 1px solid #2a2a2a; border-radius: 10px; margin-top: 8px; font-size: 10px; font-weight: 800; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; transition: all 0.2s; }
+        .log-btn-clear:hover { color: #aaa; border-color: #555; background: #1a1a1a; }
+        .log-btn-reset-all { width: 100%; padding: 12px; background: #0d0000; color: #ff6b6b; border: 1px solid #300; border-radius: 10px; margin-top: 4px; font-size: 10px; font-weight: 800; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; transition: all 0.2s; }
         .log-btn-reset-all:hover { background: #1a0000; border-color: #500; color: #ff4444; }
         .log-validation-msg { color: var(--red); font-size: 9px; text-align: center; margin-top: 4px; display: none; }
-        .log-clamp-msg { color: #555; font-size: 8px; text-align: center; margin-top: 4px; letter-spacing: 1px; }
+        .log-clamp-msg { color: #666; font-size: 8px; text-align: center; margin-top: 4px; letter-spacing: 1px; }
         #log-print-header, #log-print-footer, #log-print-summary { display: none; }
         @media print {
             @page { size: A4; margin: 10mm; }
@@ -179,9 +179,9 @@
             #installPWA { display: none !important; }
             .tab-content { display: block !important; }
         }
-        .shared-signature { text-align: center; margin-top: 18px; padding: 12px 0 3px; border-top: 1px solid #1a1a1a; position: relative; }
-        .shared-signature::before { content: ""; position: absolute; top: -1px; left: 50%; transform: translateX(-50%); width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-        .shared-sig-support { font-size: 7px; color: #555; letter-spacing: 3px; }
+        .shared-signature { text-align: center; margin-top: 18px; padding: 12px 0 3px; border-top: 1px solid #1e1e1e; position: relative; }
+        .shared-signature::before { content: ""; position: absolute; top: -1px; left: 50%; transform: translateX(-50%); width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .shared-sig-support { font-size: 7px; color: #666; letter-spacing: 3px; }
         .shared-sig-name { color: var(--gold); font-weight: 900; display: block; letter-spacing: 4px; font-size: 9px; margin-top: 2px; }
     </style>
 </head>
@@ -205,7 +205,7 @@
         <div class="calc-section-title">Sensor Input</div>
         <select id="sm" onchange="calcTglS()" class="calc-select"><option value="ma">DIRECT mA</option><option value="pt">RTD PT100 IEC 60751</option><option value="tk">TC TYPE K NIST</option><option value="ts">TC TYPE S NIST</option></select>
         <div id="cjcBox" style="display:none;margin:8px 0"><div class="calc-row"><div class="calc-col"><label class="calc-label">CJC Temp (°C)</label><input type="text" id="cjcTemp" value="25" oninput="calcSanitizeInput(this);calcCalibToRaw();calcOnParamChange()" placeholder="25" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input"></div></div></div>
-        <div id="calibBox" style="display:none;margin:8px 0 4px 0;background:#0a0a0a;border:1px solid #222;border-radius:12px;padding:10px;"><label style="text-align:center;font-size:7px;color:#777;text-transform:uppercase;display:block;margin-bottom:3px;letter-spacing:1px;font-weight:600;">Kalibrasi: Target <span id="calibUnitLabel">Unit</span> → Raw Signal</label><div class="calc-row" style="margin-top:6px;margin-bottom:0;"><div class="calc-col-2"><input type="text" id="calibTarget" placeholder="Target..." oninput="calcSanitizeInput(this);calcCalibToRaw()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input"></div><div class="calc-col"><input type="text" id="calibRawOut" placeholder="--" disabled style="color:var(--blue);font-weight:bold;border-color:#1a3a4a;" class="calc-input"></div></div><div style="text-align:center;margin-top:8px;"><button type="button" style="background:#151515;border:1px solid #333;border-radius:6px;color:var(--gold);font-size:8px;padding:8px 14px;cursor:pointer;letter-spacing:1px;font-weight:800;" onclick="calcApplyCalib()">TERAPKAN KE SENSOR INPUT</button></div></div>
+        <div id="calibBox" style="display:none;margin:8px 0 4px 0;background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:10px;"><label style="text-align:center;font-size:7px;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:3px;letter-spacing:1px;font-weight:600;">Kalibrasi: Target <span id="calibUnitLabel">Unit</span> → Raw Signal</label><div class="calc-row" style="margin-top:6px;margin-bottom:0;"><div class="calc-col-2"><input type="text" id="calibTarget" placeholder="Target..." oninput="calcSanitizeInput(this);calcCalibToRaw()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input"></div><div class="calc-col"><input type="text" id="calibRawOut" placeholder="--" disabled style="color:var(--blue);font-weight:bold;border-color:#1a3a4a;" class="calc-input"></div></div><div style="text-align:center;margin-top:8px;"><button type="button" style="background:#1a1a1a;border:1px solid #333;border-radius:6px;color:var(--gold);font-size:8px;padding:8px 14px;cursor:pointer;letter-spacing:1px;font-weight:800;" onclick="calcApplyCalib()">TERAPKAN KE SENSOR INPUT</button></div></div>
         <div class="calc-section-title">Transmitter Range</div>
         <div class="calc-row"><div class="calc-col"><label class="calc-label">LRV</label><input type="text" id="lrv" class="calc-input calc-dot-bg" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false"></div><div class="calc-col"><label class="calc-label">URV</label><input type="text" id="urv" class="calc-input calc-dot-bg" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="100" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false"></div><div class="calc-col"><label class="calc-label">UNIT</label><input type="text" id="unit" class="calc-input calc-dot-bg" oninput="calcOnParamChange()" placeholder="°C" maxlength="8"></div></div>
         <div id="rangeError" class="calc-error-msg">LRV harus lebih kecil dari URV!</div>
@@ -216,7 +216,7 @@
         <div class="calc-row"><div class="calc-col-2"><label class="calc-label">Time Constant τ (detik)</label><input type="text" id="damping" value="0" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0 = instant" min="0" max="60" step="0.1" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input"></div><div class="calc-col"><label class="calc-label">Mode</label><select id="dampingMode" onchange="calcResetDamping()" class="calc-select"><option value="off">OFF</option><option value="on">ON</option></select></div></div>
         <div class="calc-section-title">PLC Register</div>
         <select id="pb" onchange="calcTglP()" class="calc-select" style="color:var(--blue)"><option value="hi">HIDE</option><option value="27648">SIEMENS S7</option><option value="32767">ALLEN BRADLEY</option><option value="4000">MITSUBISHI FX</option><option value="abraw">AB RAW 3277-16383</option></select>
-        <div id="pp" class="calc-plc-panel"><div id="pr" class="calc-plc-val">0</div><label style="font-size:7px;color:#444;letter-spacing:1px">RAW INTEGER REGISTER</label></div>
+        <div id="pp" class="calc-plc-panel"><div id="pr" class="calc-plc-val">0</div><label style="font-size:7px;color:#555;letter-spacing:1px">RAW INTEGER REGISTER</label></div>
         <div class="calc-section-title">Transmitter Action</div>
         <select id="actionMode" onchange="calcTglAction()" class="calc-select"><option value="direct">DIRECT 4-20 mA</option><option value="reverse">REVERSE 20-4 mA</option></select>
         <div class="calc-action-indicator" id="actionIndicator">Direct: mA ↗ PV ↗</div>
@@ -232,7 +232,7 @@
         <div class="log-row"><div class="log-col"><input type="text" id="log-sn" placeholder="SERIAL NUMBER" autocomplete="off" oninput="logSaveSettings()" class="log-input"></div><div class="log-col"><input type="text" id="log-area" placeholder="PLANT AREA" autocomplete="off" oninput="logSaveSettings()" class="log-input"></div></div>
         <div class="log-section-title">CONFIGURATION</div>
         <select id="log-vMode" autocomplete="off" onchange="logChgMode()" class="log-select" style="margin-bottom:10px; border-left:4px solid var(--gold);"><option value="ma">TRANSMITTER (4-20 mA)</option><option value="pt">RTD PT100 (CVD IEC 60751)</option><option value="tk">TC TYPE K (NIST ITS-90)</option><option value="ts">TC TYPE S (NIST ITS-90)</option></select>
-        <div class="log-row"><div class="log-col"><label class="log-label">LRV</label><input type="number" inputmode="decimal" id="log-lrv" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input"></div><div class="log-col"><label class="log-label">URV</label><input type="number" inputmode="decimal" id="log-urv" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input"></div><div class="log-col"><label class="log-label">UNIT</label><input type="text" id="log-unit" placeholder="bar" autocomplete="off" oninput="logUpd();logUpdateTolUnit();logSaveSettings()" class="log-input" style="background:transparent!important; border:1px solid #222;"></div></div>
+        <div class="log-row"><div class="log-col"><label class="log-label">LRV</label><input type="number" inputmode="decimal" id="log-lrv" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input"></div><div class="log-col"><label class="log-label">URV</label><input type="number" inputmode="decimal" id="log-urv" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input"></div><div class="log-col"><label class="log-label">UNIT</label><input type="text" id="log-unit" placeholder="bar" autocomplete="off" oninput="logUpd();logUpdateTolUnit();logSaveSettings()" class="log-input" style="background:transparent!important; border:1px solid #2a2a2a;"></div></div>
         <div class="log-row" id="log-cjRow" style="display:none;"><div class="log-col"><label class="log-label" style="color:var(--orange);">COLD JUNCTION °C</label><input type="number" inputmode="decimal" id="log-coldJunction" value="25.0" step="0.1" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input" style="border:1px solid var(--orange);"></div></div>
         <div id="log-validationMsg" class="log-validation-msg">URV harus lebih besar dari LRV</div>
         <div class="log-section-title">TOLERANCE</div>
@@ -244,7 +244,7 @@
             <div class="log-direction-row"><div class="log-dir-btn active" id="log-dirUp" onclick="logSetDir('up')">UPSCALE</div><div class="log-dir-btn" id="log-dirDown" onclick="logSetDir('down')">DOWNSCALE</div></div>
             <label style="color:var(--gold); letter-spacing:2px; font-size:9px; display:block; margin-bottom:4px;">INPUT REFERENCE</label>
             <input type="number" inputmode="decimal" id="log-actIn" placeholder="0.00" autocomplete="off" class="log-input" style="border:2px solid var(--gold);" oninput="logUpd()">
-            <div class="log-ideal-display"><div id="log-maIdeal" class="log-ideal-val">---</div><div id="log-unitIdeal" style="font-size:10px; color:#555; letter-spacing:2px;"></div></div>
+            <div class="log-ideal-display"><div id="log-maIdeal" class="log-ideal-val">---</div><div id="log-unitIdeal" style="font-size:10px; color:#666; letter-spacing:2px;"></div></div>
             <label style="color:var(--blue); letter-spacing:2px; font-size:9px; display:block; margin-bottom:4px;">MEASURED OUTPUT</label>
             <input type="number" inputmode="decimal" id="log-maMeasured" placeholder="0.000" step="0.001" autocomplete="off" class="log-input" style="border:2px solid var(--blue);" oninput="logConvLive()">
             <div id="log-convOut" style="text-align:center; color:var(--green); font-size:12px; margin-top:5px; font-weight:bold;"></div>
@@ -305,7 +305,7 @@ function calcToNum(s){if(typeof s!=='string')s=String(s);s=s.trim();if(s===''||s
 function calcSanitizeInput(el){let v=el.value;v=v.replace(/,/g,'.');v=v.replace(/[^0-9.\-]/g,'');if(v.includes('-')){v=(v[0]==='-'?'-':'')+v.replace(/-/g,'').replace(/^/,'');}const parts=v.split('.');if(parts.length>2){v=parts[0]+'.'+parts.slice(1).join('');}el.value=v;}
 function calcSaveState(){try{const data={actionMode:calc$('actionMode').value,sm:calc$('sm').value,cjcTemp:calc$('cjcTemp').value,lrv:calc$('lrv').value,urv:calc$('urv').value,unit:calc$('unit').value,mi:calc$('mi').value,actualPV:calc$('actualPV').value,damping:calc$('damping').value,dampingMode:calc$('dampingMode').value,fm:calc$('fm').value,td:calc$('td').value,ta:calc$('ta').value,pd:calc$('pd').value,pa:calc$('pa').value,ffc:calc$('ffc').value,ffm:calc$('ffm').value,pb:calc$('pb').value,dpLrv:calc$('dpLrv').value,dpUrv:calc$('dpUrv').value,dpUnit:calc$('dpUnit').value,dpShowMode:calc$('dpShowMode').value,locked1:calcState.locked1,lockVal1:calcState.lockVal1,locked2:calcState.locked2,lockVal2:calcState.lockVal2};localStorage.setItem('calc_state',JSON.stringify(data));}catch(e){}}
 function calcLoadState(){const saved=localStorage.getItem('calc_state');if(!saved)return;try{const data=JSON.parse(saved);if(data.actionMode)calc$('actionMode').value=data.actionMode;if(data.sm)calc$('sm').value=data.sm;if(data.cjcTemp!==undefined)calc$('cjcTemp').value=data.cjcTemp;if(data.lrv!==undefined)calc$('lrv').value=data.lrv;if(data.urv!==undefined)calc$('urv').value=data.urv;if(data.unit!==undefined)calc$('unit').value=data.unit;if(data.mi!==undefined)calc$('mi').value=data.mi;if(data.actualPV!==undefined)calc$('actualPV').value=data.actualPV;if(data.damping!==undefined)calc$('damping').value=data.damping;if(data.dampingMode)calc$('dampingMode').value=data.dampingMode;if(data.fm)calc$('fm').value=data.fm;if(data.td!==undefined)calc$('td').value=data.td;if(data.ta!==undefined)calc$('ta').value=data.ta;if(data.pd!==undefined)calc$('pd').value=data.pd;if(data.pa!==undefined)calc$('pa').value=data.pa;if(data.ffc!==undefined)calc$('ffc').value=data.ffc;if(data.ffm)calc$('ffm').value=data.ffm;if(data.pb)calc$('pb').value=data.pb;if(data.dpLrv!==undefined)calc$('dpLrv').value=data.dpLrv;if(data.dpUrv!==undefined)calc$('dpUrv').value=data.dpUrv;if(data.dpUnit)calc$('dpUnit').value=data.dpUnit;if(data.dpShowMode)calc$('dpShowMode').value=data.dpShowMode;if(data.locked1){calcState.locked1=true;calcState.lockVal1=data.lockVal1||CALC_MA_MIN;calcEl.lockBtn1.textContent='🔒';calcEl.lockBtn1.classList.add('locked');}if(data.locked2){calcState.locked2=true;calcState.lockVal2=data.lockVal2||0;calcEl.lockBtn2.textContent='🔒';calcEl.lockBtn2.classList.add('locked');}}catch(e){}}
-function calcResetDisplayColors(){calcEl.mi.style.borderColor='#1a3a4a';calcEl.mi.style.color='#fff';calcEl.pvVal.style.color='var(--green)';}
+function calcResetDisplayColors(){calcEl.mi.style.borderColor='#1a3a4a';calcEl.mi.style.color='#e0e0e0';calcEl.pvVal.style.color='var(--green)';}
 function calcResetNamurState(){calcResetDisplayColors();calcEl.mi.placeholder='4.000';calcSetLED('normal');}
 function calcScheduleUpdate(){if(calcUpdatePending)return;calcUpdatePending=true;requestAnimationFrame(()=>{calcUpdatePending=false;calcUpd();});}
 function calcNamurStatus(mA){if(isNaN(mA))return{status:'fault',color:'var(--red)'};if(mA<=3.6)return{status:'fault',color:'var(--red)'};if(mA>3.6&&mA<3.8)return{status:'low',color:'var(--yellow)'};if(mA>=3.8&&mA<=20.5)return{status:'normal',color:'var(--green)'};if(mA>20.5&&mA<21.0)return{status:'high',color:'var(--orange)'};return{status:'fault',color:'var(--red)'};}
@@ -401,9 +401,9 @@ function log_drawChart(){
     const mrg={top:15,right:15,bottom:28,left:38},pw=w-mrg.left-mrg.right,ph=h-mrg.top-mrg.bottom;
     const isPrint=window._printing===true;
     if(isPrint){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.strokeRect(0,0,w,h);}
-    else{ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#333';ctx.lineWidth=1;ctx.strokeRect(0,0,w,h);}
+    else{ctx.fillStyle='#111';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#2a2a2a';ctx.lineWidth=1;ctx.strokeRect(0,0,w,h);}
     const midY=mrg.top+ph/2;
-    ctx.strokeStyle=isPrint?'#ddd':'#222';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(mrg.left,midY);ctx.lineTo(w-mrg.right,midY);ctx.stroke();
+    ctx.strokeStyle=isPrint?'#ddd':'#2a2a2a';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(mrg.left,midY);ctx.lineTo(w-mrg.right,midY);ctx.stroke();
     const tolVal=logGetTolValue();if(tolVal!==null&&tolVal>0&&logData.length>0){
         const maxAct=Math.max(...logData.map(d=>d.act));const minAct=Math.min(...logData.map(d=>d.act));const range=maxAct-minAct||1;
         const x1=mrg.left,x2=mrg.left+pw;
@@ -450,7 +450,7 @@ function logSavePdf(){
 }
 
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(document.getElementById('installPWA'))return;const btn=document.createElement('button');btn.id='installPWA';btn.innerText='INSTALL APP';btn.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:14px 22px;border:none;border-radius:14px;background:#d4af37;color:#000;font-weight:bold;z-index:99999;box-shadow:0 0 20px rgba(212,175,55,0.5);cursor:pointer;font-size:12px;letter-spacing:1px;';document.body.appendChild(btn);btn.addEventListener('click',async()=>{btn.remove();deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(document.getElementById('installPWA'))return;const btn=document.createElement('button');btn.id='installPWA';btn.innerText='INSTALL APP';btn.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:14px 22px;border:none;border-radius:14px;background:#c9a830;color:#000;font-weight:bold;z-index:99999;box-shadow:0 0 20px rgba(201,168,48,0.4);cursor:pointer;font-size:12px;letter-spacing:1px;';document.body.appendChild(btn);btn.addEventListener('click',async()=>{btn.remove();deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});});
 window.addEventListener('appinstalled',()=>{const btn=document.getElementById('installPWA');if(btn)btn.remove();deferredPrompt=null;});
 
 (function(){calcTglF();calcBuildRegularButtons();calcResetDamping();calcLoadState();calcTglAction();calcTglS();calcTglF();calcTglP();calcResetDamping();calcScheduleUpdate();const t=new Date();log$('log-date').value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;logLoadSettings();logLoadLogs();logUpdateTolUnit();log$('log-clampMsg').innerText=logGetClampMsg();logChgMode();logDrawChart();})();
