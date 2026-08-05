@@ -26,7 +26,7 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
 
     <style>
-        :root { --bg: #0d0d0d; --card: #1a1a1a; --gold: #c9a830; --green: #00ff41; --blue: #00d4ff; --red: #ff3b30; --orange: #ff9500; --yellow: #ffcc00; --input: #242424; --border2: #333; --text3: #888; --text1: #e0e0e0; }
+        :root { --bg: #0d0d0d; --card: #1a1a1a; --gold: #c9a830; --gold-soft: #b8942e; --green: #00ff41; --blue: #00d4ff; --red: #ff3b30; --orange: #ff9500; --yellow: #ffcc00; --input: #242424; --border2: #333; --text3: #888; --text1: #e0e0e0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text1); padding: 12px; display: flex; justify-content: center; }
         .app-container { background: var(--card); width: 100%; max-width: 540px; border-radius: 28px; border: 1px solid #2a2a2a; overflow: hidden; padding-bottom: 20px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
@@ -92,6 +92,14 @@
         .calc-toggle-track-mini::after { content: ''; position: absolute; top: 2px; left: 16px; width: 10px; height: 10px; background: #fff; border-radius: 50%; transition: left 0.3s; }
         .calc-toggle-off .calc-toggle-track-mini { background: var(--border2); }
         .calc-toggle-off .calc-toggle-track-mini::after { left: 2px; }
+
+        /* Pressure Converter — Elegan & Subtle */
+        .conv-divider { border: none; border-top: 1px solid #1e1e1e; margin: 20px 0 14px 0; position: relative; }
+        .conv-divider::after { content: "TOOLS"; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); background: var(--card); padding: 0 12px; font-size: 7px; color: #555; letter-spacing: 3px; font-weight: 700; }
+        .conv-result-box { background: #111; border: 1.5px solid #3a3a2a; font-family: 'Consolas', monospace; font-size: 22px; font-weight: 900; min-height: 56px; border-radius: 14px; text-align: center; width: 100%; margin-top: 8px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 10px; transition: border-color 0.4s ease; }
+        .conv-result-box.active { border-color: var(--gold); }
+        .conv-btn-swap { width: 100%; padding: 11px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; color: var(--gold-soft); font-size: 9px; font-weight: 800; cursor: pointer; letter-spacing: 3px; transition: all 0.3s ease; text-transform: uppercase; }
+        .conv-btn-swap:hover { background: #1a1800; border-color: var(--gold); color: #e8d080; }
 
         .log-section-title { font-size: 10px; font-weight: 900; color: #777; margin: 20px 0 10px; padding: 0 0 10px 0; text-transform: uppercase; text-align: left; letter-spacing: 3px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; gap: 10px; }
         .log-section-title::after { content: ""; width: 50px; height: 1px; background: var(--gold); flex-shrink: 0; }
@@ -196,6 +204,8 @@
         <button class="tab-btn active" onclick="switchTab('calc')">Precision Calc</button>
         <button class="tab-btn" onclick="switchTab('log')">Verification Log</button>
     </div>
+
+    <!-- ==================== TAB CALC ==================== -->
     <div class="tab-content active" id="tab-calc">
         <div class="calc-section-title">Final Process Value</div>
         <div class="calc-res-box" id="resBox"><div><span id="pv_val">0.00</span><span id="pv_unit" class="calc-unit-large"></span></div><div id="dpInfoLine" style="font-size:10px;color:var(--gold);margin-top:3px;display:none;">DP: <span id="dpVal">0.00</span> <span id="dpUnitDisplay">mbar</span></div><div class="calc-pct-mini" id="pct_display">Span: 0.00%</div></div>
@@ -222,9 +232,61 @@
         <div class="calc-action-indicator" id="actionIndicator">Direct: mA ↗ PV ↗</div>
         <div class="calc-section-title">Reference Table <label class="calc-toggle-mini" id="refTableToggle" onclick="calcToggleRefTable()"><span class="calc-toggle-track-mini"></span><span style="font-size:7px;color:var(--text3);letter-spacing:1px" id="refTableLabel">ON</span></label></div>
         <table class="calc-table" id="refTableWrap"><thead><tr><th class="calc-th">%</th><th class="calc-th">mA</th><th class="calc-th">RESULT</th><th class="calc-th" id="thRaw" style="display:none">RAW</th></tr></thead><tbody id="tb"></tbody></table>
+
+        <!-- ==================== PRESSURE CONVERTER ==================== -->
+        <hr class="conv-divider">
+        <div class="calc-section-title" style="margin-top:0;">Pressure Converter</div>
+        <div class="calc-row">
+            <div class="calc-col-2">
+                <label class="calc-label">NILAI</label>
+                <input type="text" id="convInput" oninput="convertUnit()" placeholder="0.00" lang="en" inputmode="decimal" class="calc-input" style="border:2px solid var(--gold);">
+            </div>
+            <div class="calc-col">
+                <label class="calc-label">DARI</label>
+                <select id="convFrom" onchange="convertUnit()" class="calc-select" style="border-left:3px solid var(--gold);">
+                    <option value="bar">bar</option>
+                    <option value="mbar" selected>mbar</option>
+                    <option value="kPa">kPa</option>
+                    <option value="Pa">Pa</option>
+                    <option value="MPa">MPa</option>
+                    <option value="psi">psi</option>
+                    <option value="mmHg">mmHg</option>
+                    <option value="mmH2O">mmH₂O</option>
+                    <option value="inH2O">inH₂O</option>
+                    <option value="kgcm2">kg/cm²</option>
+                    <option value="atm">atm</option>
+                </select>
+            </div>
+            <div class="calc-col">
+                <label class="calc-label">KE</label>
+                <select id="convTo" onchange="convertUnit()" class="calc-select" style="border-left:3px solid var(--gold);">
+                    <option value="kPa">kPa</option>
+                    <option value="bar">bar</option>
+                    <option value="mbar">mbar</option>
+                    <option value="Pa">Pa</option>
+                    <option value="MPa">MPa</option>
+                    <option value="psi">psi</option>
+                    <option value="mmHg">mmHg</option>
+                    <option value="mmH2O">mmH₂O</option>
+                    <option value="inH2O">inH₂O</option>
+                    <option value="kgcm2">kg/cm²</option>
+                    <option value="atm">atm</option>
+                </select>
+            </div>
+        </div>
+        <div class="conv-result-box" id="convResultBox">
+            <span id="convResult" style="font-size:26px;">0.00</span>
+            <span id="convToUnit" style="font-size:18px; margin-left:6px;">kPa</span>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+            <button class="conv-btn-swap" onclick="swapConvUnit()">SWAP</button>
+        </div>
+
         <button class="calc-reset" onclick="calcClr()">RESET ALL DATA</button>
         <div class="shared-signature"><span class="shared-sig-support">Made by</span><span class="shared-sig-name">RANGGA.A</span></div>
     </div>
+
+    <!-- ==================== TAB LOG ==================== -->
     <div class="tab-content" id="tab-log">
         <div class="log-section-title">ADMINISTRATIVE INFO</div>
         <input type="text" id="log-tech" placeholder="TECHNICIAN NAME" autocomplete="off" oninput="logSaveSettings()" class="log-input" style="margin-bottom:10px;">
@@ -272,6 +334,12 @@
 <script>
 function switchTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));if(tab==='calc'){document.querySelectorAll('.tab-btn')[0].classList.add('active');document.getElementById('tab-calc').classList.add('active');calcScheduleUpdate();}else{document.querySelectorAll('.tab-btn')[1].classList.add('active');document.getElementById('tab-log').classList.add('active');setTimeout(()=>{logDrawChart();},100);}}
 
+// ==================== PRESSURE CONVERTER ====================
+const pressureToBar={bar:1,mbar:0.001,kPa:0.01,Pa:0.00001,MPa:10,psi:0.0689476,mmHg:0.00133322,mmH2O:0.0000980665,inH2O:0.00249089,kgcm2:0.980665,atm:1.01325};
+function convertUnit(){const i=document.getElementById('convInput'),f=document.getElementById('convFrom'),t=document.getElementById('convTo'),r=document.getElementById('convResult'),u=document.getElementById('convToUnit'),box=document.getElementById('convResultBox');if(!i||!f||!t)return;let v=parseFloat(i.value.replace(',','.'));if(isNaN(v)){r.innerText='0.00';u.innerText=t.value;box.classList.remove('active');return;}const fu=f.value,tu=t.value;const inBar=v*(pressureToBar[fu]||1);const result=inBar/(pressureToBar[tu]||1);if(Math.abs(result)<0.0001&&result!==0)r.innerText=result.toExponential(4);else if(Math.abs(result)>=1000000)r.innerText=result.toExponential(4);else r.innerText=parseFloat(result.toFixed(4)).toString();u.innerText=tu;box.classList.add('active');}
+function swapConvUnit(){const f=document.getElementById('convFrom'),t=document.getElementById('convTo');if(!f||!t)return;const tmp=f.value;f.value=t.value;t.value=tmp;convertUnit();}
+
+// ==================== CALC ENGINE ====================
 const CALC_MA_MIN=4,CALC_MA_MAX=20,CALC_MA_SPAN=16;
 const CALC_TABLE_POINTS=[0,25,50,75,100];
 const CALC_SIEMENS_MAX=27648,CALC_AB_MAX=32767,CALC_MITSUBISHI_MAX=4000;
@@ -338,6 +406,7 @@ function calcUpdateTable(lrv,urv,unit,fmMode,actionMode){if(isNaN(lrv)||isNaN(ur
 function calcUpd(){const mA=calcGetCurrentmA(),lrv=calcToNum(calc$('lrv').value),urv=calcToNum(calc$('urv').value),unit=calc$('unit').value||'Unit',fmMode=calc$('fm').value,actionMode=calc$('actionMode').value;calcEl.actualUnitLbl.textContent=unit;calcEl.rangeError.style.display=(!isNaN(lrv)&&!isNaN(urv)&&urv<=lrv)?'block':'none';if(isNaN(mA)){calcEl.pvVal.innerText='---';calcEl.pvUnit.innerText='';calcEl.pctDisplay.innerText='Span: 0.00%';calcEl.tb.innerHTML='';calcEl.pr.innerText='0';calcSetLED('fault');return;}const namurResult=calcNamurStatus(mA);if(calcUpdateNamurUI(mA,namurResult))return;if(isNaN(lrv)||isNaN(urv)||urv<=lrv){calcEl.pvVal.innerText='0.00';calcEl.pvUnit.innerText=unit;calcEl.tb.innerHTML='';return;}const pctElecUncapped=calcUpdateFinalPV(mA,lrv,urv,unit,fmMode,actionMode);calcUpdatePLCRegister(pctElecUncapped);calcUpdateTable(lrv,urv,unit,fmMode,actionMode);calcSaveState();}
 function calcClr(){['lrv','urv','mi','cjcTemp','td','ta','pd','pa','actualPV','damping','ffc','calibTarget','dpLrv','dpUrv','dpUnit'].forEach(id=>{const e=calc$(id);if(e)e.value='';});calc$('unit').value='';calc$('ffm').value='off';calc$('damping').value='0';calc$('dampingMode').value='off';calc$('dpShowMode').value='off';if(calc$('dpInfoLine'))calc$('dpInfoLine').style.display='none';calcDampingActive=false;calcDampedValue=CALC_MA_MIN;calcStopDampingLoop();calcEl.dampedDisplay.textContent='';calcClearPctButtons();calc$('pp').style.display='none';calc$('pb').value='hi';calc$('fm').value='ln';calcTglF();calc$('sm').value='ma';calcTglS();calcTglAction();calcEl.mi.disabled=false;calcEl.actualPV.disabled=false;calcEl.pvVal.innerText='0.00';calcEl.pvUnit.innerText='';calcEl.pr.innerText='0';calcEl.pctDisplay.innerText='Span: 0.00%';calcEl.tb.innerHTML='';calcEl.rangeError.style.display='none';calc$('cjcBox').style.display='none';calcState.lockVal1=CALC_MA_MIN;calcState.locked1=false;calcEl.lockBtn1.textContent='🔓';calcEl.lockBtn1.classList.remove('locked');calcState.lockVal2=0;calcState.locked2=false;calcEl.lockBtn2.textContent='🔓';calcEl.lockBtn2.classList.remove('locked');calcResetTableCache();document.querySelectorAll('#tab-calc .calc-btn-pct').forEach(b=>b.disabled=false);calcEl.actualPVbox.style.display='flex';calcBuildRegularButtons();calcResetNamurState();calcResetDamping();localStorage.removeItem('calc_state');calcScheduleUpdate();}
 
+// ==================== LOG ENGINE ====================
 const LOG_R0=100,LOG_A=3.9083e-3,LOG_B=-5.775e-7,LOG_C=-4.183e-12;
 function logPT100_TtoR(T){if(T>=0)return LOG_R0*(1+LOG_A*T+LOG_B*T*T);return LOG_R0*(1+LOG_A*T+LOG_B*T*T+LOG_C*(T-100)*T*T*T);}
 function logPT100_RtoT(R){if(R>=LOG_R0){const d=(R/LOG_R0)-1,dis=LOG_A*LOG_A+4*LOG_B*d;return(-LOG_A+Math.sqrt(dis))/(2*LOG_B);}let T=-50;for(let i=0;i<10;i++){const T100=T-100,f=LOG_R0*(1+LOG_A*T+LOG_B*T*T+LOG_C*T100*T*T*T)-R,df=LOG_R0*(LOG_A+2*LOG_B*T+LOG_C*T*T*(4*T-300));if(Math.abs(df)<1e-15)break;T-=f/df;if(Math.abs(f/df)<1e-12)break;}return T;}
@@ -390,64 +459,10 @@ function logResetAutoBtn(){const btn=log$('log-btnAuto');btn.innerText='AUTO STE
 function logAutoStep(){if(logAutoStepActive){alert('Auto Step sedang berjalan. Selesaikan 0-100% terlebih dahulu.');return;}if(!logValidateRange()){alert("URV harus lebih besar dari LRV");return;}if(logData.length>0){if(!confirm('Data pengukuran sudah ada.\n\nAuto Step akan memulai input reference dari 0%.\nData yang sudah ada TIDAK akan dihapus.\n\nLanjutkan Auto Step?')){return;}}const lrv=parseFloat(log$('log-lrv').value)||0,s=logGetSpan();if(s===0){alert("Span tidak boleh nol");return;}logAutoStepIdx=0;logAutoStepActive=true;logSetAutoRef(lrv,s,0);}
 function logSetAutoRef(lrv,s,i){const ref=lrv+(s*LOG_STEPS[i]/100);log$('log-actIn').value=ref;log$('log-maMeasured').value='';log$('log-convOut').innerText='';logUpd();const btn=log$('log-btnAuto');btn.innerText=`AUTO STEP ${LOG_STEPS[i]}% (${i+1}/5)`;btn.classList.add('running');log$('log-maMeasured').focus();}
 document.addEventListener('click',function(e){if(!logAutoStepActive)return;if(!e.target.classList.contains('log-btn-add'))return;const lrv=parseFloat(log$('log-lrv').value)||0,s=logGetSpan();setTimeout(()=>{logAutoStepIdx++;if(logAutoStepIdx>=LOG_STEPS.length){logAutoStepActive=false;logAutoStepIdx=-1;logResetAutoBtn();return;}logSetAutoRef(lrv,s,logAutoStepIdx);},350);},true);
-
 let logChartRaf=null;
 function logDrawChart(){if(logChartRaf)cancelAnimationFrame(logChartRaf);logChartRaf=requestAnimationFrame(log_drawChart);}
-function log_drawChart(){
-    logChartRaf=null;const cvs=log$('log-errorChart');if(!cvs)return;const ctx=cvs.getContext('2d');
-    const container=cvs.parentElement;
-    const w=cvs.width=container.offsetWidth-24;
-    const h=cvs.height=Math.max(160,w*0.4);
-    const mrg={top:15,right:15,bottom:28,left:38},pw=w-mrg.left-mrg.right,ph=h-mrg.top-mrg.bottom;
-    const isPrint=window._printing===true;
-    if(isPrint){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.strokeRect(0,0,w,h);}
-    else{ctx.fillStyle='#111';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#2a2a2a';ctx.lineWidth=1;ctx.strokeRect(0,0,w,h);}
-    const midY=mrg.top+ph/2;
-    ctx.strokeStyle=isPrint?'#ddd':'#2a2a2a';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(mrg.left,midY);ctx.lineTo(w-mrg.right,midY);ctx.stroke();
-    const tolVal=logGetTolValue();if(tolVal!==null&&tolVal>0&&logData.length>0){
-        const maxAct=Math.max(...logData.map(d=>d.act));const minAct=Math.min(...logData.map(d=>d.act));const range=maxAct-minAct||1;
-        const x1=mrg.left,x2=mrg.left+pw;
-        ctx.strokeStyle='#ff9500';ctx.lineWidth=1;ctx.setLineDash([4,4]);
-        ctx.beginPath();ctx.moveTo(x1,midY-ph*(tolVal/(range*2)*2));ctx.lineTo(x2,midY-ph*(tolVal/(range*2)*2));ctx.stroke();
-        ctx.beginPath();ctx.moveTo(x1,midY+ph*(tolVal/(range*2)*2));ctx.lineTo(x2,midY+ph*(tolVal/(range*2)*2));ctx.stroke();
-        ctx.setLineDash([]);
-    }
-    ctx.fillStyle=isPrint?'#333':'#888';ctx.font='bold 7px sans-serif';ctx.textAlign='right';
-    const labels=[2,1,0,-1,-2];labels.forEach(v=>{const y=midY-(v*ph/5);ctx.fillText(v+'%',mrg.left-4,y+3);});
-    ctx.textAlign='center';
-    const sorted=[...logData].sort((a,b)=>a.act-b.act);
-    if(sorted.length>0){
-        const minAct=sorted[0].act,maxAct=sorted[sorted.length-1].act;const range=maxAct-minAct||1;
-        const refs=[0,25,50,75,100].map(p=>minAct+(range*p/100));
-        refs.forEach((ref,i)=>{const x=mrg.left+(pw/4)*i;ctx.fillText(ref.toFixed(1),x,h-6);});
-        ctx.strokeStyle=isPrint?'#000':'#555';ctx.lineWidth=1.2;
-        ctx.beginPath();ctx.moveTo(mrg.left,h-mrg.bottom);ctx.lineTo(w-mrg.right,h-mrg.bottom);ctx.stroke();
-        ctx.beginPath();ctx.moveTo(mrg.left,mrg.top);ctx.lineTo(mrg.left,h-mrg.bottom);ctx.stroke();
-        sorted.forEach(d=>{
-            const x=mrg.left+((d.act-minAct)/range)*pw;const errVal=parseFloat(d.err);const y=midY-(errVal/5)*ph;
-            ctx.beginPath();ctx.arc(x,Math.max(mrg.top,Math.min(h-mrg.bottom,y)),4,0,Math.PI*2);
-            ctx.fillStyle=d.dir==='▲'?'#00d4ff':'#ff3b30';ctx.fill();
-            ctx.strokeStyle=isPrint?'#000':'#fff';ctx.lineWidth=1;ctx.stroke();
-        });
-    }
-}
-
-function logSavePdf(){
-    log$('log-p-tech').innerText=log$('log-tech').value||"-";log$('log-p-tag').innerText=log$('log-tag').value||"-";
-    log$('log-p-sn').innerText=log$('log-sn').value||"-";log$('log-p-area').innerText=log$('log-area').value||"-";
-    log$('log-p-range').innerText=(log$('log-lrv').value||"0")+" to "+(log$('log-urv').value||"0")+" "+(log$('log-unit').value||"");
-    const d=log$('log-date').value;if(d){const[y,m,day]=d.split("-");log$('log-p-date').innerText=`${day}-${m}-${y}`;}else{log$('log-p-date').innerText="-";}
-    const tolVal=logGetTolValue(),tolUnit=logGetTolUnit();
-    if(tolVal!==null){log$('log-p-tolerance').innerText=`± ${tolVal} ${tolUnit}`;log$('log-p-tolerance').style.color='#000';}else{log$('log-p-tolerance').innerText='VERIFICATION ONLY';log$('log-p-tolerance').style.color='#666';}
-    const total=logData.length;let pass=0;logData.forEach(l=>{if(tolVal!==null&&Math.abs(parseFloat(l.err))<=tolVal)pass++;});
-    if(total===0){log$('log-p-summary-result').innerHTML='<span style="color:#333;">NO DATA</span>';log$('log-p-summary-detail').innerText='No verification points recorded.';}
-    else if(tolVal===null){log$('log-p-summary-result').innerHTML='<span style="color:#333;">VERIFICATION ONLY</span>';log$('log-p-summary-detail').innerHTML='<span style="color:#333;">'+total+' points recorded (no tolerance)</span>';}
-    else{const ok=pass===total,pct=Math.round((pass/total)*100);
-        log$('log-p-summary-result').innerHTML=ok?'<span style="color:#006600;">PASSED</span>':'<span style="color:#cc0000;">FAILED</span>';
-        log$('log-p-summary-detail').innerHTML=ok?`<span style="color:#006600;">${pass}/${total} (${pct}%) within ±${tolVal} ${tolUnit}</span>`:`<span style="color:#cc0000;">${pass}/${total} (${pct}%) — ${total-pass} out of tolerance ±${tolVal} ${tolUnit}</span>`;}
-    logSaveSettings();window._printing=true;logDrawChart();
-    setTimeout(()=>{window.print();},200);setTimeout(()=>{window._printing=false;logDrawChart();},1000);
-}
+function log_drawChart(){logChartRaf=null;const cvs=log$('log-errorChart');if(!cvs)return;const ctx=cvs.getContext('2d');const container=cvs.parentElement;const w=cvs.width=container.offsetWidth-24;const h=cvs.height=Math.max(160,w*0.4);const mrg={top:15,right:15,bottom:28,left:38},pw=w-mrg.left-mrg.right,ph=h-mrg.top-mrg.bottom;const isPrint=window._printing===true;if(isPrint){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#000';ctx.lineWidth=1.5;ctx.strokeRect(0,0,w,h);}else{ctx.fillStyle='#111';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#2a2a2a';ctx.lineWidth=1;ctx.strokeRect(0,0,w,h);}const midY=mrg.top+ph/2;ctx.strokeStyle=isPrint?'#ddd':'#2a2a2a';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(mrg.left,midY);ctx.lineTo(w-mrg.right,midY);ctx.stroke();const tolVal=logGetTolValue();if(tolVal!==null&&tolVal>0&&logData.length>0){const maxAct=Math.max(...logData.map(d=>d.act));const minAct=Math.min(...logData.map(d=>d.act));const range=maxAct-minAct||1;const x1=mrg.left,x2=mrg.left+pw;ctx.strokeStyle='#ff9500';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x1,midY-ph*(tolVal/(range*2)*2));ctx.lineTo(x2,midY-ph*(tolVal/(range*2)*2));ctx.stroke();ctx.beginPath();ctx.moveTo(x1,midY+ph*(tolVal/(range*2)*2));ctx.lineTo(x2,midY+ph*(tolVal/(range*2)*2));ctx.stroke();ctx.setLineDash([]);}ctx.fillStyle=isPrint?'#333':'#888';ctx.font='bold 7px sans-serif';ctx.textAlign='right';const labels=[2,1,0,-1,-2];labels.forEach(v=>{const y=midY-(v*ph/5);ctx.fillText(v+'%',mrg.left-4,y+3);});ctx.textAlign='center';const sorted=[...logData].sort((a,b)=>a.act-b.act);if(sorted.length>0){const minAct=sorted[0].act,maxAct=sorted[sorted.length-1].act;const range=maxAct-minAct||1;const refs=[0,25,50,75,100].map(p=>minAct+(range*p/100));refs.forEach((ref,i)=>{const x=mrg.left+(pw/4)*i;ctx.fillText(ref.toFixed(1),x,h-6);});ctx.strokeStyle=isPrint?'#000':'#555';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(mrg.left,h-mrg.bottom);ctx.lineTo(w-mrg.right,h-mrg.bottom);ctx.stroke();ctx.beginPath();ctx.moveTo(mrg.left,mrg.top);ctx.lineTo(mrg.left,h-mrg.bottom);ctx.stroke();sorted.forEach(d=>{const x=mrg.left+((d.act-minAct)/range)*pw;const errVal=parseFloat(d.err);const y=midY-(errVal/5)*ph;ctx.beginPath();ctx.arc(x,Math.max(mrg.top,Math.min(h-mrg.bottom,y)),4,0,Math.PI*2);ctx.fillStyle=d.dir==='▲'?'#00d4ff':'#ff3b30';ctx.fill();ctx.strokeStyle=isPrint?'#000':'#fff';ctx.lineWidth=1;ctx.stroke();});}}
+function logSavePdf(){log$('log-p-tech').innerText=log$('log-tech').value||"-";log$('log-p-tag').innerText=log$('log-tag').value||"-";log$('log-p-sn').innerText=log$('log-sn').value||"-";log$('log-p-area').innerText=log$('log-area').value||"-";log$('log-p-range').innerText=(log$('log-lrv').value||"0")+" to "+(log$('log-urv').value||"0")+" "+(log$('log-unit').value||"");const d=log$('log-date').value;if(d){const[y,m,day]=d.split("-");log$('log-p-date').innerText=`${day}-${m}-${y}`;}else{log$('log-p-date').innerText="-";}const tolVal=logGetTolValue(),tolUnit=logGetTolUnit();if(tolVal!==null){log$('log-p-tolerance').innerText=`± ${tolVal} ${tolUnit}`;log$('log-p-tolerance').style.color='#000';}else{log$('log-p-tolerance').innerText='VERIFICATION ONLY';log$('log-p-tolerance').style.color='#666';}const total=logData.length;let pass=0;logData.forEach(l=>{if(tolVal!==null&&Math.abs(parseFloat(l.err))<=tolVal)pass++;});if(total===0){log$('log-p-summary-result').innerHTML='<span style="color:#333;">NO DATA</span>';log$('log-p-summary-detail').innerText='No verification points recorded.';}else if(tolVal===null){log$('log-p-summary-result').innerHTML='<span style="color:#333;">VERIFICATION ONLY</span>';log$('log-p-summary-detail').innerHTML='<span style="color:#333;">'+total+' points recorded (no tolerance)</span>';}else{const ok=pass===total,pct=Math.round((pass/total)*100);log$('log-p-summary-result').innerHTML=ok?'<span style="color:#006600;">PASSED</span>':'<span style="color:#cc0000;">FAILED</span>';log$('log-p-summary-detail').innerHTML=ok?`<span style="color:#006600;">${pass}/${total} (${pct}%) within ±${tolVal} ${tolUnit}</span>`:`<span style="color:#cc0000;">${pass}/${total} (${pct}%) — ${total-pass} out of tolerance ±${tolVal} ${tolUnit}</span>`;}logSaveSettings();window._printing=true;logDrawChart();setTimeout(()=>{window.print();},200);setTimeout(()=>{window._printing=false;logDrawChart();},1000);}
 
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(document.getElementById('installPWA'))return;const btn=document.createElement('button');btn.id='installPWA';btn.innerText='INSTALL APP';btn.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:14px 22px;border:none;border-radius:14px;background:#c9a830;color:#000;font-weight:bold;z-index:99999;box-shadow:0 0 20px rgba(201,168,48,0.4);cursor:pointer;font-size:12px;letter-spacing:1px;';document.body.appendChild(btn);btn.addEventListener('click',async()=>{btn.remove();deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});});
