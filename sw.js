@@ -1,4 +1,4 @@
-const CACHE_NAME = 'precision-calc-v3.0';
+const CACHE_NAME = 'precision-calc-v1.0';
 const ASSETS = [
     '/',
     '/index.html',
