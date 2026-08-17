@@ -1,5 +1,5 @@
 // sw.js - Precision Calc & Verification Log
-// Auto Update Service Worker - Tidak perlu ganti versi manual
+// AGRESIF MODE - Selalu update, hapus cache lama total
 
 const CACHE_NAME = 'precision-calc-v' + Date.now();
 const ASSETS = [
@@ -11,111 +11,85 @@ const ASSETS = [
   './icon-512.png'
 ];
 
-// Install event - cache semua asset utama
+// Install: Hapus SEMUA cache lama, lalu cache asset baru
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.keys()
+      .then(keys => Promise.all(keys.map(key => caches.delete(key))))
+      .then(() => caches.open(CACHE_NAME))
       .then(cache => {
-        // Cache asset satu per satu agar tidak gagal total
         return Promise.allSettled(
-          ASSETS.map(asset => 
-            cache.add(asset).catch(err => {
-              console.warn('[SW] Gagal cache:', asset, err);
-            })
-          )
+          ASSETS.map(asset => cache.add(asset).catch(err => {
+            console.warn('[SW] Gagal cache:', asset, err);
+          }))
         );
       })
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - bersihkan cache lama
+// Activate: Bersihkan cache lama & klaim semua client
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => {
-        return Promise.all(
-          keys.filter(key => key !== CACHE_NAME)
-              .map(key => caches.delete(key))
-        );
-      })
-      .then(() => {
-        console.log('[SW] Activated, old caches cleared');
-        return self.clients.claim();
-      })
+      .then(keys => Promise.all(
+        keys.filter(key => key !== CACHE_NAME)
+            .map(key => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch event - strategi cerdas berdasarkan tipe request
+// Fetch: Network first untuk semua, fallback cache
 self.addEventListener('fetch', event => {
   const req = event.request;
   
-  // Skip non-GET requests
   if (req.method !== 'GET') return;
-  
-  // Skip chrome-extension dan non-http
   if (!req.url.startsWith('http')) return;
   
-  // Strategi: Network First untuk HTML (selalu dapat versi terbaru)
+  // HTML: Network first, fallback index.html
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
         .then(resp => {
           if (resp.status === 200) {
             const clone = resp.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put('./index.html', clone);
-            });
+            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', clone));
           }
           return resp;
         })
-        .catch(() => {
-          return caches.match('./index.html')
-            .then(cached => cached || caches.match('./'));
-        })
+        .catch(() => caches.match('./index.html'))
     );
     return;
   }
   
-  // Strategi: Stale While Revalidate untuk asset statis
-  // (Lebih cepat + selalu update di background)
+  // Asset statis: Cache first, update background
   event.respondWith(
     caches.match(req).then(cached => {
       const fetchPromise = fetch(req)
         .then(resp => {
           if (resp.status === 200) {
             const clone = resp.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(req, clone);
-            });
+            caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
           }
           return resp;
         })
-        .catch(() => {
-          // Fallback untuk image/icon
-          if (req.url.includes('.png') || req.url.includes('.svg')) {
-            return caches.match('./icon-192.png');
-          }
-          return cached;
-        });
+        .catch(() => cached);
       
-      // Kembalikan cache dulu, update di background
       return cached || fetchPromise;
     })
   );
 });
 
-// Message event - trigger skip waiting dari client
+// Message: SKIP_WAITING
 self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // Push notification
 self.addEventListener('push', event => {
   const options = {
-    body: event.data ? event.data.text() : 'Update available',
+    body: event.data ? event.data.text() : 'Precision Calc Update',
     icon: './icon-192.png',
     badge: './icon-192.png'
   };
@@ -127,17 +101,5 @@ self.addEventListener('push', event => {
 // Notification click
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  event.waitUntil(
-    clients.openWindow('./')
-  );
-});
-
-// Periodic sync (untuk update data - opsional)
-self.addEventListener('periodicsync', event => {
-  if (event.tag === 'check-update') {
-    event.waitUntil(
-      // Cek update di sini
-      Promise.resolve()
-    );
-  }
+  event.waitUntil(clients.openWindow('./'));
 });
