@@ -1,7 +1,7 @@
 // sw.js - Precision Calc & Verification Log
 // Auto Update Service Worker - Tidak perlu ganti versi manual
 
-const CACHE_NAME = 'precision-calc-v' + Date.now(); // Cache selalu baru setiap deploy
+const CACHE_NAME = 'precision-calc-v' + Date.now();
 const ASSETS = [
   './',
   './index.html',
@@ -14,30 +14,36 @@ const ASSETS = [
 // Install event - cache semua asset utama
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS).catch(err => {
-        console.error('[SW] Cache error:', err);
-        // Lanjutkan meskipun ada yang gagal
-        return Promise.resolve();
-      });
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        // Cache asset satu per satu agar tidak gagal total
+        return Promise.allSettled(
+          ASSETS.map(asset => 
+            cache.add(asset).catch(err => {
+              console.warn('[SW] Gagal cache:', asset, err);
+            })
+          )
+        );
+      })
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 // Activate event - bersihkan cache lama
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-      );
-    }).then(() => {
-      console.log('[SW] Activated, old caches cleared');
-    })
+    caches.keys()
+      .then(keys => {
+        return Promise.all(
+          keys.filter(key => key !== CACHE_NAME)
+              .map(key => caches.delete(key))
+        );
+      })
+      .then(() => {
+        console.log('[SW] Activated, old caches cleared');
+        return self.clients.claim();
+      })
   );
-  self.clients.claim();
 });
 
 // Fetch event - strategi cerdas berdasarkan tipe request
@@ -55,7 +61,6 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req)
         .then(resp => {
-          // Update cache dengan versi terbaru
           if (resp.status === 200) {
             const clone = resp.clone();
             caches.open(CACHE_NAME).then(cache => {
@@ -65,37 +70,37 @@ self.addEventListener('fetch', event => {
           return resp;
         })
         .catch(() => {
-          // Fallback ke cache saat offline
-          return caches.match('./index.html').then(cached => {
-            if (cached) return cached;
-            return caches.match('./');
-          });
+          return caches.match('./index.html')
+            .then(cached => cached || caches.match('./'));
         })
     );
     return;
   }
   
-  // Strategi: Cache First untuk asset statis (cepat)
-  // Cache akan terupdate otomatis karena CACHE_NAME berubah setiap deploy
+  // Strategi: Stale While Revalidate untuk asset statis
+  // (Lebih cepat + selalu update di background)
   event.respondWith(
     caches.match(req).then(cached => {
-      if (cached) return cached;
+      const fetchPromise = fetch(req)
+        .then(resp => {
+          if (resp.status === 200) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(req, clone);
+            });
+          }
+          return resp;
+        })
+        .catch(() => {
+          // Fallback untuk image/icon
+          if (req.url.includes('.png') || req.url.includes('.svg')) {
+            return caches.match('./icon-192.png');
+          }
+          return cached;
+        });
       
-      return fetch(req).then(resp => {
-        // Hanya cache response yang valid
-        if (resp.status === 200 || resp.type === 'opaque') {
-          const clone = resp.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(req, clone);
-          });
-        }
-        return resp;
-      }).catch(() => {
-        // Fallback untuk image/icon
-        if (req.url.includes('.png') || req.url.includes('.svg')) {
-          return caches.match('./icon-192.png');
-        }
-      });
+      // Kembalikan cache dulu, update di background
+      return cached || fetchPromise;
     })
   );
 });
@@ -107,7 +112,7 @@ self.addEventListener('message', event => {
   }
 });
 
-// Push notification (optional - bisa diaktifkan nanti)
+// Push notification
 self.addEventListener('push', event => {
   const options = {
     body: event.data ? event.data.text() : 'Update available',
@@ -125,4 +130,14 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.openWindow('./')
   );
+});
+
+// Periodic sync (untuk update data - opsional)
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'check-update') {
+    event.waitUntil(
+      // Cek update di sini
+      Promise.resolve()
+    );
+  }
 });
