@@ -1,5 +1,5 @@
 // sw.js - Precision Calc & Verification Log
-// AGRESIF MODE - Selalu update, hapus cache lama total
+// SUPER AGRESIF - Paksa update semua file
 
 const CACHE_NAME = 'precision-calc-v' + Date.now();
 const ASSETS = [
@@ -32,52 +32,29 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-      ))
+      .then(keys => Promise.all(keys.map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
 
-// Fetch: Network first untuk semua, fallback cache
+// Fetch: Network first untuk SEMUA, tanpa cache fallback
 self.addEventListener('fetch', event => {
   const req = event.request;
   
   if (req.method !== 'GET') return;
   if (!req.url.startsWith('http')) return;
   
-  // HTML: Network first, fallback index.html
-  if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req)
-        .then(resp => {
-          if (resp.status === 200) {
-            const clone = resp.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', clone));
-          }
-          return resp;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-  
-  // Asset statis: Cache first, update background
+  // Network first untuk semua
   event.respondWith(
-    caches.match(req).then(cached => {
-      const fetchPromise = fetch(req)
-        .then(resp => {
-          if (resp.status === 200) {
-            const clone = resp.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
-          }
-          return resp;
-        })
-        .catch(() => cached);
-      
-      return cached || fetchPromise;
-    })
+    fetch(req)
+      .then(resp => {
+        if (resp.status === 200) {
+          const clone = resp.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+        }
+        return resp;
+      })
+      .catch(() => caches.match(req))
   );
 });
 
@@ -102,4 +79,11 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(clients.openWindow('./'));
+});
+
+// Update otomatis saat halaman dibuka
+self.addEventListener('message', event => {
+  if (event.data === 'CHECK_UPDATE') {
+    self.update();
+  }
 });
