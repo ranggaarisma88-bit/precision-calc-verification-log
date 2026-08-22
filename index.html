@@ -1196,6 +1196,19 @@
                     <input type="text" id="calibRawOut" placeholder="--" disabled style="color:var(--blue);font-weight:bold;border-color:#1a3a4a;" class="calc-input">
                 </div>
             </div>
+            
+            <!-- ADC/DAC INFO -->
+            <div style="margin-top:6px;background:var(--input);border:1px solid var(--border2);border-radius:6px;padding:6px;text-align:center;">
+                <div style="margin-bottom:3px;">
+                    <span style="font-size:7px;color:var(--text3);">ADC 24-bit: </span>
+                    <span style="font-size:11px;color:var(--green);font-weight:bold;" id="adcValueDisplay">---</span>
+                </div>
+                <div>
+                    <span style="font-size:7px;color:var(--text3);">DAC 16-bit: </span>
+                    <span style="font-size:11px;color:var(--blue);font-weight:bold;" id="dacValueDisplay">---</span>
+                </div>
+            </div>
+            
             <div style="text-align:center;margin-top:8px;">
                 <button type="button" style="background:var(--input);border:1px solid var(--border2);border-radius:6px;color:var(--gold);font-size:8px;padding:8px 14px;cursor:pointer;letter-spacing:1px;font-weight:800;" onclick="calcApplyCalib()">
                     APPLY TO SENSOR INPUT
@@ -1620,14 +1633,9 @@
 /* ==================== THEME SYSTEM ==================== */
 function setTheme(themeName) {
     vibrate(15);
-    
-    // Simpan pilihan
     localStorage.setItem('app_theme', themeName);
-    
-    // Terapkan theme
     document.documentElement.setAttribute('data-theme', themeName);
     
-    // Update meta theme-color
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const themeColors = {
         industrial: '#0d0d0d',
@@ -1637,7 +1645,6 @@ function setTheme(themeName) {
     };
     if (metaTheme) metaTheme.content = themeColors[themeName] || '#0d0d0d';
     
-    // Update button states
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.remove('active');
         const badge = btn.querySelector('.theme-badge');
@@ -1652,7 +1659,6 @@ function setTheme(themeName) {
         }
     }
     
-    // Tutup popup
     setTimeout(() => {
         const popup = document.getElementById('themePopup');
         if (popup) popup.classList.remove('show');
@@ -1664,16 +1670,13 @@ function setTheme(themeName) {
 function toggleThemeMenu() {
     vibrate(10);
     const popup = document.getElementById('themePopup');
-    if (popup) {
-        popup.classList.toggle('show');
-    }
+    if (popup) popup.classList.toggle('show');
 }
 
 function loadTheme() {
     const saved = localStorage.getItem('app_theme') || 'industrial';
     document.documentElement.setAttribute('data-theme', saved);
     
-    // Update button states
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.remove('active');
         const badge = btn.querySelector('.theme-badge');
@@ -1688,7 +1691,6 @@ function loadTheme() {
         }
     }
     
-    // Update meta theme-color
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const themeColors = {
         industrial: '#0d0d0d',
@@ -1748,7 +1750,6 @@ function switchTab(tab){
         document.getElementById('tab-log').classList.add('active');
         setTimeout(()=>{logDrawChart();},100);
     }
-    // Tutup theme popup jika terbuka
     const popup = document.getElementById('themePopup');
     if (popup) popup.classList.remove('show');
 }
@@ -1769,7 +1770,7 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('click', function(e) {
     const popup = document.getElementById('themePopup');
-    const themeBtn = document.querySelector('.theme-toggle-btn');
+    const themeBtn = document.querySelector('.theme-divider-btn');
     if (popup && popup.classList.contains('show') && 
         !popup.contains(e.target) && 
         !themeBtn.contains(e.target)) {
@@ -2184,6 +2185,7 @@ function calcTglS(){
         calc$('calibBox').style.display='none';
         calc$('calibTarget').value='';
         calc$('calibRawOut').value='';
+        updateADCDisplay(NaN,NaN);
         calcDampedValue=CALC_MA_MIN;
         calcEl.dampedDisplay.textContent='';
     }else{
@@ -2226,15 +2228,59 @@ function calcUpdateCalibUnitLabel(){
     const lbl=calc$('calibUnitLabel');
     if(lbl)lbl.textContent=calc$('unit').value||'Unit';
 }
+
+/* ============ ADC/DAC DISPLAY ============ */
+function updateADCDisplay(rawValue, targetValue) {
+    const adcEl = document.getElementById('adcValueDisplay');
+    const dacEl = document.getElementById('dacValueDisplay');
+    
+    if (!adcEl || !dacEl) return;
+    
+    const mode = calc$('sm').value;
+    
+    if (isNaN(rawValue) || !mode || mode === 'ma' || mode === 'ma-rev') {
+        adcEl.innerText = '---';
+        dacEl.innerText = '---';
+        return;
+    }
+    
+    // ADC 24-bit
+    const rawRanges = {
+        pt: { min: 18, max: 390 },
+        tk: { min: -6.5, max: 54.8 },
+        ts: { min: -0.236, max: 18.693 }
+    };
+    const range = rawRanges[mode];
+    const adcMax = 16777215;
+    const pct = Math.max(0, Math.min(1, (rawValue - range.min) / (range.max - range.min)));
+    const adcValue = Math.round(pct * adcMax);
+    adcEl.innerText = adcValue.toLocaleString();
+    
+    // DAC 16-bit
+    const lrv = calcToNum(calc$('lrv').value);
+    const urv = calcToNum(calc$('urv').value);
+    if (!isNaN(lrv) && !isNaN(urv) && urv > lrv && !isNaN(targetValue)) {
+        const targetPct = Math.max(0, Math.min(1, (targetValue - lrv) / (urv - lrv)));
+        const dacMax = 65535;
+        const dacValue = Math.round(targetPct * dacMax);
+        const dacMa = 4 + (dacValue / dacMax) * 16;
+        dacEl.innerText = dacValue.toLocaleString() + ' | ' + dacMa.toFixed(3) + ' mA';
+    } else {
+        dacEl.innerText = 'Set range';
+    }
+}
+
 function calcCalibToRaw(){
     const mode=calc$('sm').value,outEl=calc$('calibRawOut');
     if(mode==='ma'||mode==='ma-rev'){
         outEl.value='';
+        updateADCDisplay(NaN,NaN);
         return;
     }
     const target=calcToNum(calc$('calibTarget').value);
     if(isNaN(target)){
         outEl.value='';
+        updateADCDisplay(NaN,NaN);
         return;
     }
     let raw=NaN,unitLabel='';
@@ -2251,6 +2297,7 @@ function calcCalibToRaw(){
         unitLabel='mV';
     }
     outEl.value=isNaN(raw)?'--':raw.toFixed(3)+' '+unitLabel;
+    updateADCDisplay(raw, target);
 }
 function calcApplyCalib(){
     vibrate(20);
@@ -2709,6 +2756,7 @@ function calcClr(){
     calcBuildRegularButtons();
     calcResetNamurState();
     calcResetDamping();
+    updateADCDisplay(NaN,NaN);
     const ci=document.getElementById('convInput'),
           cr=document.getElementById('convResult'),
           cu=document.getElementById('convToUnit'),
