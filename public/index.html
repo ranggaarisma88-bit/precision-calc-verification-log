@@ -710,7 +710,6 @@
         }
         .custom-apply-btn:hover { background: #1a1800; color: #fff; }
 
-        /* Button Apply dengan Aksen */
         .calc-apply-btn {
             background: linear-gradient(135deg, var(--gold), var(--gold-soft));
             border: none;
@@ -1184,31 +1183,54 @@
             <div class="calc-row">
                 <div class="calc-col">
                     <label class="calc-label">CJC Temp (°C)</label>
-                    <input type="text" id="cjcTemp" value="25" oninput="calcSanitizeInput(this);calcCalibToRaw();calcOnParamChange()" placeholder="25" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                    <input type="text" id="cjcTemp" value="25" oninput="calcSanitizeInput(this);calcOnCjcChange()" placeholder="25" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
                 </div>
             </div>
         </div>
         
-        <!-- CALIBRATION BOX -->
+        <!-- CALIBRATION BOX dengan 2 Mode -->
         <div id="calibBox" style="display:none;margin:8px 0 4px 0;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:10px;">
             <label style="text-align:center;font-size:7px;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:3px;letter-spacing:1px;font-weight:600;">
-                Calibration: Target <span id="calibUnitLabel">Unit</span> → Raw Signal
+                Calibration: <span id="calibUnitLabel">Unit</span>
             </label>
-            <div class="calc-row" style="margin-top:6px;margin-bottom:0;">
-                <div class="calc-col-2">
-                    <input type="text" id="calibTarget" placeholder="Target..." oninput="calcSanitizeInput(this);calcCalibToRaw()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                </div>
-                <div class="calc-col">
-                    <input type="text" id="calibRawOut" placeholder="--" disabled style="color:var(--blue);font-weight:bold;border-color:#1a3a4a;" class="calc-input">
-                </div>
+            
+            <!-- Mode Selector -->
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <button type="button" id="calibModeTarget" class="ref-mode-btn active" onclick="calcSetCalibMode('target')" style="font-size:8px;padding:6px;">TARGET °C</button>
+                <button type="button" id="calibModeSensor" class="ref-mode-btn" onclick="calcSetCalibMode('sensor')" style="font-size:8px;padding:6px;">SENSOR mV</button>
             </div>
             
-            <!-- Range Sensor - Presisi -->
-            <div style="text-align:center;margin-top:4px;">
-                <span style="font-size:7px;color:var(--text3);letter-spacing:1px;" id="sensorRangeDisplay"></span>
+            <!-- Mode Target: Input °C → Output mV/Ω (Kolom Seimbang) -->
+            <div id="calibTargetMode">
+                <div class="calc-row" style="margin-top:6px;margin-bottom:0;">
+                    <div class="calc-col">
+                        <label class="calc-label">Target (°C)</label>
+                        <input type="text" id="calibTarget" placeholder="Target..." oninput="calcSanitizeInput(this);calcCalibToRaw()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                    </div>
+                    <div class="calc-col">
+                        <label class="calc-label">Raw Output</label>
+                        <input type="text" id="calibRawOut" placeholder="--" disabled style="color:var(--blue);font-weight:bold;border-color:#1a3a4a;" class="calc-input">
+                    </div>
+                </div>
+                <div style="text-align:center;font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:4px;" id="sensorRangeDisplay"></div>
             </div>
             
-            <!-- Tombol Apply dengan Aksen -->
+            <!-- Mode Sensor: Input mV → Output °C (Kolom Seimbang) -->
+            <div id="calibSensorMode" style="display:none;">
+                <div class="calc-row" style="margin-top:6px;margin-bottom:0;">
+                    <div class="calc-col">
+                        <label class="calc-label">Sensor (mV)</label>
+                        <input type="text" id="calibSensorMv" placeholder="mV..." oninput="calcSanitizeInput(this);calcMvToTarget()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                    </div>
+                    <div class="calc-col">
+                        <label class="calc-label">Temp Result</label>
+                        <input type="text" id="calibTempOut" placeholder="--" disabled style="color:var(--green);font-weight:bold;border-color:#1a3a2a;" class="calc-input">
+                    </div>
+                </div>
+                <div style="text-align:center;font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:4px;" id="sensorRangeDisplay2"></div>
+            </div>
+            
+            <!-- Tombol Apply -->
             <div style="text-align:center;margin-top:8px;">
                 <button type="button" class="calc-apply-btn" onclick="calcApplyCalib()">
                     APPLY TO SENSOR INPUT
@@ -1233,25 +1255,20 @@
         </div>
         <div id="rangeError" class="calc-error-msg">LRV must be less than URV!</div>
         
-        <!-- ADC/DAC INFO - Format PLC Register Presisi -->
+        <!-- ADC/DAC INFO - Format PLC Register -->
         <div id="adcDacInfoBox" style="display:none;margin-top:8px;background:var(--card);border:1px solid #1a332a;border-radius:10px;padding:10px;text-align:center;">
-            <!-- ADC Register -->
             <div style="font-family:'Consolas',monospace;font-size:18px;color:var(--green);font-weight:bold;" id="adcValueDisplay">---</div>
             <div style="font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:2px;">Range: 0 - 16,777,215</div>
             <div style="font-size:7px;color:var(--green);letter-spacing:1px;margin-top:3px;font-weight:700;">ADC 24-BIT REGISTER</div>
             
-            <!-- Divider -->
             <div style="border-top:1px solid var(--border2);margin:8px 0;"></div>
             
-            <!-- DAC Register -->
             <div style="font-family:'Consolas',monospace;font-size:18px;color:var(--blue);font-weight:bold;" id="dacValueDisplay">---</div>
             <div style="font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:2px;">Range: 0 - 65,535</div>
             <div style="font-size:7px;color:var(--blue);letter-spacing:1px;margin-top:3px;font-weight:700;">DAC 16-BIT REGISTER</div>
             
-            <!-- Divider -->
             <div style="border-top:1px solid var(--border2);margin:8px 0;"></div>
             
-            <!-- Output -->
             <div style="font-family:'Consolas',monospace;font-size:14px;color:var(--gold);font-weight:bold;" id="dacMaDisplay">---</div>
             <div style="font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:2px;">DAC OUTPUT</div>
         </div>
@@ -1853,7 +1870,7 @@ function swapConvUnit(){
 
 /* ==================== CALC ENGINE ==================== */
 const CALC_MA_MIN=4,CALC_MA_MAX=20,CALC_MA_SPAN=16;
-let CALC_TABLE_POINTS=[0,25,50,75,100],calcRefMode='custom';
+let CALC_TABLE_POINTS=[0,25,50,75,100],calcRefMode='custom',calibMode='target';
 const CALC_SIEMENS_MAX=27648,CALC_AB_MAX=32767,CALC_MITSUBISHI_MAX=4000,CALC_AB_RAW_LOW=3277,CALC_AB_RAW_HIGH=16383;
 const CALC_NAMUR={faultLow:3.6,low:3.8,high:20.5,faultHigh:21.0};
 const CALC_PT100_A=3.9083e-3,CALC_PT100_B=-5.775e-7,CALC_PT100_C=-4.183e-12,CALC_PT100_R0=100;
@@ -2004,6 +2021,7 @@ function calcSaveState(){
             locked2:calcState.locked2,
             lockVal2:calcState.lockVal2,
             refMode:calcRefMode,
+            calibMode:calibMode,
             customPointCount:document.getElementById('customPointCount')?.value||'0'
         };
         for(let i=1;i<=5;i++){
@@ -2039,6 +2057,7 @@ function calcLoadState(){
         if(data.dpUrv!==undefined)calc$('dpUrv').value=data.dpUrv;
         if(data.dpUnit)calc$('dpUnit').value=data.dpUnit;
         if(data.dpShowMode)calc$('dpShowMode').value=data.dpShowMode;
+        if(data.calibMode){calibMode=data.calibMode;}
         if(data.locked1){
             calcState.locked1=true;
             calcState.lockVal1=data.lockVal1||CALC_MA_MIN;
@@ -2199,10 +2218,14 @@ function calcToggleLock2(){
         calcEl.lockBtn2.classList.remove('locked');
     }
 }
+
+/* ============ UPDATED: calcTglS dengan mode sensor hanya untuk TC ============ */
 function calcTglS(){
     vibrate(15);
     const mode=calc$('sm').value;
     const adcDacBox=document.getElementById('adcDacInfoBox');
+    const calibModeSensorBtn=document.getElementById('calibModeSensor');
+    
     if(mode==='ma'||mode==='ma-rev'){
         calc$('cjcBox').style.display='none';
         calcEl.actualPVbox.style.display='flex';
@@ -2223,7 +2246,20 @@ function calcTglS(){
         calc$('calibBox').style.display='block';
         if(adcDacBox)adcDacBox.style.display='block';
         calcUpdateCalibUnitLabel();
-        calcCalibToRaw();
+        
+        // Tampilkan/sembunyikan mode sensor berdasarkan tipe
+        if(calibModeSensorBtn){
+            if(mode==='tk'||mode==='ts'){
+                calibModeSensorBtn.style.display='block';
+            }else{
+                calibModeSensorBtn.style.display='none';
+                if(calibMode==='sensor'){
+                    calcSetCalibMode('target');
+                }
+            }
+        }
+        
+        if(calibMode==='target'){calcCalibToRaw();}else{calcMvToTarget();}
         calcDampedValue=CALC_MA_MIN;
         calcEl.dampedDisplay.textContent='';
     }
@@ -2257,10 +2293,25 @@ function calcUpdateCalibUnitLabel(){
     if(lbl)lbl.textContent=calc$('unit').value||'Unit';
 }
 
+/* ============ CALIBRATION MODE ============ */
+function calcSetCalibMode(mode){
+    vibrate(15);
+    calibMode=mode;
+    document.getElementById('calibModeTarget').classList.toggle('active',mode==='target');
+    document.getElementById('calibModeSensor').classList.toggle('active',mode==='sensor');
+    document.getElementById('calibTargetMode').style.display=mode==='target'?'block':'none';
+    document.getElementById('calibSensorMode').style.display=mode==='sensor'?'block':'none';
+    if(mode==='target'){
+        calcCalibToRaw();
+    }else{
+        calcMvToTarget();
+    }
+}
+
 /* ============ SENSOR RANGE DISPLAY ============ */
 function updateSensorRangeDisplay(mode) {
-    const el = document.getElementById('sensorRangeDisplay');
-    if (!el) return;
+    const el1 = document.getElementById('sensorRangeDisplay');
+    const el2 = document.getElementById('sensorRangeDisplay2');
     
     const ranges = {
         pt: 'Range: 18 - 390 Ω',
@@ -2268,7 +2319,9 @@ function updateSensorRangeDisplay(mode) {
         ts: 'Range: -0.236 - 18.693 mV'
     };
     
-    el.innerText = ranges[mode] || '';
+    const text = ranges[mode] || '';
+    if (el1) el1.innerText = text;
+    if (el2) el2.innerText = text;
 }
 
 /* ============ ADC/DAC DISPLAY ============ */
@@ -2281,7 +2334,7 @@ function updateADCDisplay(rawValue, targetValue) {
     
     const mode = calc$('sm').value;
     
-    if (isNaN(rawValue) || !mode || mode === 'ma' || mode === 'ma-rev') {
+    if (isNaN(rawValue) || !mode || mode === 'ma' || mode === 'ma-rev' || isNaN(targetValue)) {
         adcEl.innerText = '---';
         dacEl.innerText = '---';
         dacMaEl.innerText = '---';
@@ -2297,12 +2350,11 @@ function updateADCDisplay(rawValue, targetValue) {
     const pct = Math.max(0, Math.min(1, (rawValue - range.min) / (range.max - range.min)));
     const adcValue = Math.round(pct * 16777215);
     
-    // ADC Value
     adcEl.innerText = adcValue.toLocaleString();
     
     const lrv = calcToNum(calc$('lrv').value);
     const urv = calcToNum(calc$('urv').value);
-    if (!isNaN(lrv) && !isNaN(urv) && urv > lrv && !isNaN(targetValue)) {
+    if (!isNaN(lrv) && !isNaN(urv) && urv > lrv) {
         const targetPct = Math.max(0, Math.min(1, (targetValue - lrv) / (urv - lrv)));
         const dacValue = Math.round(targetPct * 65535);
         const dacMa = 4 + targetPct * 16;
@@ -2315,6 +2367,7 @@ function updateADCDisplay(rawValue, targetValue) {
     }
 }
 
+/* ============ MODE TARGET: Input °C → Output mV/Ω ============ */
 function calcCalibToRaw(){
     const mode=calc$('sm').value,outEl=calc$('calibRawOut');
     if(mode==='ma'||mode==='ma-rev'){
@@ -2346,42 +2399,94 @@ function calcCalibToRaw(){
     outEl.value=isNaN(raw)?'--':raw.toFixed(3)+' '+unitLabel;
     updateADCDisplay(raw, target);
 }
+
+/* ============ MODE SENSOR: Input mV → Output °C (Hanya TC) ============ */
+function calcMvToTarget(){
+    const mode=calc$('sm').value;
+    const outEl=calc$('calibTempOut');
+    const mvEl=calc$('calibSensorMv');
+    
+    if(mode==='ma'||mode==='ma-rev'||mode==='pt'){
+        if(outEl)outEl.value='';
+        updateADCDisplay(NaN,NaN);
+        updateSensorRangeDisplay('');
+        return;
+    }
+    updateSensorRangeDisplay(mode);
+    const mv=calcToNum(mvEl.value);
+    if(isNaN(mv)){
+        if(outEl)outEl.value='';
+        updateADCDisplay(NaN,NaN);
+        return;
+    }
+    
+    let temp=NaN;
+    if(mode==='tk'){
+        const cjcTemp=calcToNum(calc$('cjcTemp').value);
+        const cjc_mV=!isNaN(cjcTemp)?calcTcK_TtoV(cjcTemp):0;
+        temp=calcTcK_mVToTemp(mv+cjc_mV);
+    }else if(mode==='ts'){
+        temp=calcTcS_VtoT(mv);
+    }
+    
+    if(outEl)outEl.value=isNaN(temp)?'--':temp.toFixed(3)+' °C';
+    updateADCDisplay(mv, temp);
+}
+
+/* ============ CJC CHANGE ============ */
+function calcOnCjcChange(){
+    calcSanitizeInput(calc$('cjcTemp'));
+    if(calibMode==='target'){
+        calcCalibToRaw();
+    }else{
+        calcMvToTarget();
+    }
+    calcScheduleUpdate();
+}
+
 function calcApplyCalib(){
     vibrate(20);
     const mode=calc$('sm').value;
     if(mode==='ma'||mode==='ma-rev')return;
-    const target=calcToNum(calc$('calibTarget').value);
-    if(isNaN(target))return;
+    
+    let target=NaN;
     let raw=NaN;
-    if(mode==='pt')raw=calcPT100_TtoR(target);
-    else if(mode==='tk'){
-        const cjcTemp=calcToNum(calc$('cjcTemp').value);
-        const cjcmV=!isNaN(cjcTemp)?calcTcK_TtoV(cjcTemp):0;
-        raw=calcTcK_TtoV(target)-cjcmV;
-    }else if(mode==='ts')raw=calcTcS_TtoV(target);
-    if(isNaN(raw))return;
+    
+    if(calibMode==='target'){
+        target=calcToNum(calc$('calibTarget').value);
+        if(isNaN(target))return;
+        if(mode==='pt')raw=calcPT100_TtoR(target);
+        else if(mode==='tk'){
+            const cjcTemp=calcToNum(calc$('cjcTemp').value);
+            const cjcmV=!isNaN(cjcTemp)?calcTcK_TtoV(cjcTemp):0;
+            raw=calcTcK_TtoV(target)-cjcmV;
+        }else if(mode==='ts')raw=calcTcS_TtoV(target);
+    }else{
+        if(mode==='pt')return; // RTD tidak punya mode sensor mV
+        const mv=calcToNum(calc$('calibSensorMv').value);
+        if(isNaN(mv))return;
+        raw=mv;
+        if(mode==='tk'){
+            const cjcTemp=calcToNum(calc$('cjcTemp').value);
+            const cjc_mV=!isNaN(cjcTemp)?calcTcK_TtoV(cjcTemp):0;
+            target=calcTcK_mVToTemp(mv+cjc_mV);
+        }else if(mode==='ts'){
+            target=calcTcS_VtoT(mv);
+        }
+    }
+    
+    if(isNaN(raw)||isNaN(target))return;
     const lrv=calcToNum(calc$('lrv').value),urv=calcToNum(calc$('urv').value);
     const actionMode=(calc$('sm').value==='ma-rev')?'reverse':'direct';
     if(isNaN(lrv)||isNaN(urv))return;
-    let engValue=NaN;
-    if(mode==='pt'){
-        engValue=calcPT100_RtoT(raw);
-    }else if(mode==='tk'){
-        const cjcTemp=calcToNum(calc$('cjcTemp').value);
-        const cjc_mV=!isNaN(cjcTemp)?calcTcK_TtoV(cjcTemp):0;
-        engValue=calcTcK_mVToTemp(raw+cjc_mV);
-    }else if(mode==='ts'){
-        engValue=calcTcS_VtoT(raw);
-    }
-    if(isNaN(engValue))return;
     if(urv<=lrv){
         calcEl.rangeError.style.display='block';
         calcScheduleUpdate();
         return;
     }
     calcEl.rangeError.style.display='none';
-    const pct=actionMode==='reverse'?(urv-engValue)/(urv-lrv):(engValue-lrv)/(urv-lrv);
-    const displayMA=calcClamp(CALC_MA_MIN+pct*CALC_MA_SPAN,2.5,22.5);
+    const pct=actionMode==='reverse'?(urv-target)/(urv-lrv):(target-lrv)/(urv-lrv);
+    const displayMA=calcClamp(CALC_MA_MIN+Math.max(0,Math.min(1,pct))*CALC_MA_SPAN,2.5,22.5);
     calcEl.mi.value=displayMA.toFixed(3);
     if(!calcState.locked1)calcState.lockVal1=displayMA;
     calcScheduleUpdate();
@@ -2768,7 +2873,7 @@ function calcApplyCustomPoints(){
 }
 function calcClr(){
     vibrate(50);
-    ['lrv','urv','mi','cjcTemp','td','ta','pd','pa','actualPV','damping','ffc','calibTarget','dpLrv','dpUrv','dpUnit'].forEach(id=>{
+    ['lrv','urv','mi','cjcTemp','td','ta','pd','pa','actualPV','damping','ffc','calibTarget','calibSensorMv','dpLrv','dpUrv','dpUnit'].forEach(id=>{
         const e=calc$(id);
         if(e)e.value='';
     });
@@ -2816,6 +2921,7 @@ function calcClr(){
     updateSensorRangeDisplay('');
     const plcRangeEl=document.getElementById('plcRangeDisplay');
     if(plcRangeEl)plcRangeEl.innerText='';
+    calcSetCalibMode('target');
     const ci=document.getElementById('convInput'),
           cr=document.getElementById('convResult'),
           cu=document.getElementById('convToUnit'),
@@ -3455,6 +3561,7 @@ window.addEventListener('appinstalled',()=>{
     calcTglF();
     calcTglP();
     calcResetDamping();
+    calcSetCalibMode(calibMode||'target');
     document.getElementById('refTableContent').style.display='';
     calc$('refTableLabel').textContent='ON';
     calc$('refTableToggle').classList.remove('calc-toggle-off');
