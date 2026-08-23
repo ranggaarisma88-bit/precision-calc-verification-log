@@ -1,7 +1,7 @@
 // sw.js - Precision Calc & Verification Log
 // SUPER AGRESIF - Paksa update semua file
 
-const CACHE_NAME = 'precision-calc-v' + Date.now();
+const CACHE_NAME = 'precision-calc-v' + Date.now()+'_' + Math.random();
 const ASSETS = [
   './',
   './index.html',
