@@ -710,6 +710,30 @@
         }
         .custom-apply-btn:hover { background: #1a1800; color: #fff; }
 
+        /* Button Apply dengan Aksen */
+        .calc-apply-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-soft));
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 10px 16px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 3px 12px rgba(201,168,48,0.3);
+            transition: all 0.3s ease;
+        }
+        .calc-apply-btn:hover {
+            box-shadow: 0 5px 20px rgba(201,168,48,0.5);
+            transform: translateY(-1px);
+        }
+        .calc-apply-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(201,168,48,0.2);
+        }
+
         .conv-divider { border: none; border-top: 1px solid var(--border2); margin: 20px 0 14px 0; position: relative; }
         .conv-divider::after { 
             content: "TOOLS"; 
@@ -1164,6 +1188,8 @@
                 </div>
             </div>
         </div>
+        
+        <!-- CALIBRATION BOX -->
         <div id="calibBox" style="display:none;margin:8px 0 4px 0;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:10px;">
             <label style="text-align:center;font-size:7px;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:3px;letter-spacing:1px;font-weight:600;">
                 Calibration: Target <span id="calibUnitLabel">Unit</span> → Raw Signal
@@ -1176,8 +1202,15 @@
                     <input type="text" id="calibRawOut" placeholder="--" disabled style="color:var(--blue);font-weight:bold;border-color:#1a3a4a;" class="calc-input">
                 </div>
             </div>
+            
+            <!-- Range Sensor - Presisi -->
+            <div style="text-align:center;margin-top:4px;">
+                <span style="font-size:7px;color:var(--text3);letter-spacing:1px;" id="sensorRangeDisplay"></span>
+            </div>
+            
+            <!-- Tombol Apply dengan Aksen -->
             <div style="text-align:center;margin-top:8px;">
-                <button type="button" style="background:var(--input);border:1px solid var(--border2);border-radius:6px;color:var(--gold);font-size:8px;padding:8px 14px;cursor:pointer;letter-spacing:1px;font-weight:800;" onclick="calcApplyCalib()">
+                <button type="button" class="calc-apply-btn" onclick="calcApplyCalib()">
                     APPLY TO SENSOR INPUT
                 </button>
             </div>
@@ -1200,16 +1233,27 @@
         </div>
         <div id="rangeError" class="calc-error-msg">LRV must be less than URV!</div>
         
-        <!-- ADC/DAC INFO - Di Process Transmitter -->
-        <div id="adcDacInfoBox" style="display:none;margin-top:8px;background:var(--input);border:1px solid var(--border2);border-radius:6px;padding:6px;text-align:center;">
-            <div style="margin-bottom:3px;">
-                <span style="font-size:7px;color:var(--text3);">ADC 24-bit: </span>
-                <span style="font-size:11px;color:var(--green);font-weight:bold;" id="adcValueDisplay">---</span>
-            </div>
-            <div>
-                <span style="font-size:7px;color:var(--text3);">DAC 16-bit: </span>
-                <span style="font-size:11px;color:var(--blue);font-weight:bold;" id="dacValueDisplay">---</span>
-            </div>
+        <!-- ADC/DAC INFO - Format PLC Register Presisi -->
+        <div id="adcDacInfoBox" style="display:none;margin-top:8px;background:var(--card);border:1px solid #1a332a;border-radius:10px;padding:10px;text-align:center;">
+            <!-- ADC Register -->
+            <div style="font-family:'Consolas',monospace;font-size:18px;color:var(--green);font-weight:bold;" id="adcValueDisplay">---</div>
+            <div style="font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:2px;">Range: 0 - 16,777,215</div>
+            <div style="font-size:7px;color:var(--green);letter-spacing:1px;margin-top:3px;font-weight:700;">ADC 24-BIT REGISTER</div>
+            
+            <!-- Divider -->
+            <div style="border-top:1px solid var(--border2);margin:8px 0;"></div>
+            
+            <!-- DAC Register -->
+            <div style="font-family:'Consolas',monospace;font-size:18px;color:var(--blue);font-weight:bold;" id="dacValueDisplay">---</div>
+            <div style="font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:2px;">Range: 0 - 65,535</div>
+            <div style="font-size:7px;color:var(--blue);letter-spacing:1px;margin-top:3px;font-weight:700;">DAC 16-BIT REGISTER</div>
+            
+            <!-- Divider -->
+            <div style="border-top:1px solid var(--border2);margin:8px 0;"></div>
+            
+            <!-- Output -->
+            <div style="font-family:'Consolas',monospace;font-size:14px;color:var(--gold);font-weight:bold;" id="dacMaDisplay">---</div>
+            <div style="font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:2px;">DAC OUTPUT</div>
         </div>
 
         <div class="calc-section-title">Analog & Simulation</div>
@@ -1265,7 +1309,8 @@
         </select>
         <div id="pp" class="calc-plc-panel">
             <div id="pr" class="calc-plc-val">0</div>
-            <label style="font-size:7px;color:var(--text3);letter-spacing:1px">RAW INTEGER REGISTER</label>
+            <div style="font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:2px;" id="plcRangeDisplay"></div>
+            <label style="font-size:7px;color:var(--text3);letter-spacing:1px;">RAW INTEGER REGISTER</label>
         </div>
 
         <!-- REFERENCE TABLE -->
@@ -2167,6 +2212,7 @@ function calcTglS(){
         calc$('calibRawOut').value='';
         if(adcDacBox)adcDacBox.style.display='none';
         updateADCDisplay(NaN,NaN);
+        updateSensorRangeDisplay('');
         calcDampedValue=CALC_MA_MIN;
         calcEl.dampedDisplay.textContent='';
     }else{
@@ -2211,18 +2257,34 @@ function calcUpdateCalibUnitLabel(){
     if(lbl)lbl.textContent=calc$('unit').value||'Unit';
 }
 
+/* ============ SENSOR RANGE DISPLAY ============ */
+function updateSensorRangeDisplay(mode) {
+    const el = document.getElementById('sensorRangeDisplay');
+    if (!el) return;
+    
+    const ranges = {
+        pt: 'Range: 18 - 390 Ω',
+        tk: 'Range: -6.5 - 54.8 mV',
+        ts: 'Range: -0.236 - 18.693 mV'
+    };
+    
+    el.innerText = ranges[mode] || '';
+}
+
 /* ============ ADC/DAC DISPLAY ============ */
 function updateADCDisplay(rawValue, targetValue) {
     const adcEl = document.getElementById('adcValueDisplay');
     const dacEl = document.getElementById('dacValueDisplay');
+    const dacMaEl = document.getElementById('dacMaDisplay');
     
-    if (!adcEl || !dacEl) return;
+    if (!adcEl || !dacEl || !dacMaEl) return;
     
     const mode = calc$('sm').value;
     
     if (isNaN(rawValue) || !mode || mode === 'ma' || mode === 'ma-rev') {
         adcEl.innerText = '---';
         dacEl.innerText = '---';
+        dacMaEl.innerText = '---';
         return;
     }
     
@@ -2232,21 +2294,24 @@ function updateADCDisplay(rawValue, targetValue) {
         ts: { min: -0.236, max: 18.693 }
     };
     const range = rawRanges[mode];
-    const adcMax = 16777215;
     const pct = Math.max(0, Math.min(1, (rawValue - range.min) / (range.max - range.min)));
-    const adcValue = Math.round(pct * adcMax);
+    const adcValue = Math.round(pct * 16777215);
+    
+    // ADC Value
     adcEl.innerText = adcValue.toLocaleString();
     
     const lrv = calcToNum(calc$('lrv').value);
     const urv = calcToNum(calc$('urv').value);
     if (!isNaN(lrv) && !isNaN(urv) && urv > lrv && !isNaN(targetValue)) {
         const targetPct = Math.max(0, Math.min(1, (targetValue - lrv) / (urv - lrv)));
-        const dacMax = 65535;
-        const dacValue = Math.round(targetPct * dacMax);
-        const dacMa = 4 + (dacValue / dacMax) * 16;
-        dacEl.innerText = dacValue.toLocaleString() + ' | ' + dacMa.toFixed(3) + ' mA';
+        const dacValue = Math.round(targetPct * 65535);
+        const dacMa = 4 + targetPct * 16;
+        
+        dacEl.innerText = dacValue.toLocaleString();
+        dacMaEl.innerText = dacMa.toFixed(3) + ' mA';
     } else {
-        dacEl.innerText = 'Set range';
+        dacEl.innerText = '---';
+        dacMaEl.innerText = 'Set range';
     }
 }
 
@@ -2255,8 +2320,10 @@ function calcCalibToRaw(){
     if(mode==='ma'||mode==='ma-rev'){
         outEl.value='';
         updateADCDisplay(NaN,NaN);
+        updateSensorRangeDisplay('');
         return;
     }
+    updateSensorRangeDisplay(mode);
     const target=calcToNum(calc$('calibTarget').value);
     if(isNaN(target)){
         outEl.value='';
@@ -2515,15 +2582,24 @@ function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
 }
 function calcUpdatePLCRegister(pctElecUncapped){
     const pbVal=calc$('pb').value;
+    const plcRangeEl=document.getElementById('plcRangeDisplay');
+    
     if(pbVal!=='hi'){
         let reg;
+        let rangeText='';
+        
         if(pbVal==='abraw'){
             reg=Math.round(CALC_AB_RAW_LOW+calcClamp(pctElecUncapped,0,1)*(CALC_AB_RAW_HIGH-CALC_AB_RAW_LOW));
+            rangeText='Range: ' + CALC_AB_RAW_LOW.toLocaleString() + ' - ' + CALC_AB_RAW_HIGH.toLocaleString() + ' (AB Raw)';
         }else{
             const maxReg=pbVal==='27648'?CALC_SIEMENS_MAX:pbVal==='32767'?CALC_AB_MAX:CALC_MITSUBISHI_MAX;
+            const plcName=pbVal==='27648'?'Siemens S7':pbVal==='32767'?'Allen Bradley':'Mitsubishi FX';
             reg=Math.round(calcClamp(pctElecUncapped,0,1)*maxReg);
+            rangeText='Range: 0 - ' + maxReg.toLocaleString() + ' (' + plcName + ')';
         }
-        calcEl.pr.innerText=reg;
+        
+        calcEl.pr.innerText=reg.toLocaleString();
+        if(plcRangeEl)plcRangeEl.innerText=rangeText;
     }
 }
 function calcUpdateTable(lrv,urv,unit,fmMode){
@@ -2737,6 +2813,9 @@ function calcClr(){
     calcResetNamurState();
     calcResetDamping();
     updateADCDisplay(NaN,NaN);
+    updateSensorRangeDisplay('');
+    const plcRangeEl=document.getElementById('plcRangeDisplay');
+    if(plcRangeEl)plcRangeEl.innerText='';
     const ci=document.getElementById('convInput'),
           cr=document.getElementById('convResult'),
           cu=document.getElementById('convToUnit'),
