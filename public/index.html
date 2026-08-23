@@ -710,29 +710,6 @@
         }
         .custom-apply-btn:hover { background: #1a1800; color: #fff; }
 
-        .calc-apply-btn {
-            background: linear-gradient(135deg, var(--gold), var(--gold-soft));
-            border: none;
-            border-radius: 8px;
-            color: #000;
-            font-size: 9px;
-            font-weight: 900;
-            padding: 10px 16px;
-            cursor: pointer;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            box-shadow: 0 3px 12px rgba(201,168,48,0.3);
-            transition: all 0.3s ease;
-        }
-        .calc-apply-btn:hover {
-            box-shadow: 0 5px 20px rgba(201,168,48,0.5);
-            transform: translateY(-1px);
-        }
-        .calc-apply-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 8px rgba(201,168,48,0.2);
-        }
-
         .conv-divider { border: none; border-top: 1px solid var(--border2); margin: 20px 0 14px 0; position: relative; }
         .conv-divider::after { 
             content: "TOOLS"; 
@@ -1232,7 +1209,7 @@
             
             <!-- Tombol Apply -->
             <div style="text-align:center;margin-top:8px;">
-                <button type="button" class="calc-apply-btn" onclick="calcApplyCalib()">
+                <button type="button" class="custom-apply-btn" onclick="calcApplyCalib()">
                     APPLY TO SENSOR INPUT
                 </button>
             </div>
@@ -1673,6 +1650,7 @@
         </div>
     </div>
 </div>
+
 <script>
 /* ==================== THEME SYSTEM ==================== */
 function setTheme(themeName) {
@@ -2222,12 +2200,11 @@ function calcToggleLock2(){
     }
 }
 
-/* ============ UPDATED: calcTglS dengan mode sensor hanya untuk TC ============ */
+/* ============ SENSOR MODE TOGGLE ============ */
 function calcTglS(){
     vibrate(15);
     const mode=calc$('sm').value;
     const adcDacBox=document.getElementById('adcDacInfoBox');
-    const calibModeSensorBtn=document.getElementById('calibModeSensor');
     
     if(mode==='ma'||mode==='ma-rev'){
         calc$('cjcBox').style.display='none';
@@ -2250,17 +2227,8 @@ function calcTglS(){
         if(adcDacBox)adcDacBox.style.display='block';
         calcUpdateCalibUnitLabel();
         
-        // Tampilkan/sembunyikan mode sensor berdasarkan tipe
-        if(calibModeSensorBtn){
-            if(mode==='tk'||mode==='ts'){
-                calibModeSensorBtn.style.display='block';
-            }else{
-                calibModeSensorBtn.style.display='none';
-                if(calibMode==='sensor'){
-                    calcSetCalibMode('target');
-                }
-            }
-        }
+        // Reset ADC/DAC display saat ganti mode
+        updateADCDisplay(NaN,NaN);
         
         if(calibMode==='target'){calcCalibToRaw();}else{calcMvToTarget();}
         calcDampedValue=CALC_MA_MIN;
@@ -2270,6 +2238,7 @@ function calcTglS(){
     calcResetDamping();
     calcScheduleUpdate();
 }
+
 function calcBuildRegularButtons(){
     const isFlow=(calc$('fm').value==='dp'||calc$('fm').value==='ol'||calc$('fm').value==='gs');
     let html='';
@@ -2386,6 +2355,7 @@ function calcCalibToRaw(){
         updateADCDisplay(NaN,NaN);
         return;
     }
+    
     let raw=NaN,unitLabel='';
     if(mode==='pt'){
         raw=calcPT100_TtoR(target);
@@ -2399,8 +2369,10 @@ function calcCalibToRaw(){
         raw=calcTcS_TtoV(target);
         unitLabel='mV';
     }
+    
     outEl.value=isNaN(raw)?'--':raw.toFixed(3)+' '+unitLabel;
-    updateADCDisplay(raw, target);
+    // JANGAN tampilkan ADC/DAC di sini - biarkan kosong
+    updateADCDisplay(NaN,NaN);
 }
 
 /* ============ MODE SENSOR: Input mV → Output °C (Hanya TC) ============ */
@@ -2433,7 +2405,8 @@ function calcMvToTarget(){
     }
     
     if(outEl)outEl.value=isNaN(temp)?'--':temp.toFixed(3)+' °C';
-    updateADCDisplay(mv, temp);
+    // JANGAN tampilkan ADC/DAC di sini - biarkan kosong
+    updateADCDisplay(NaN,NaN);
 }
 
 /* ============ CJC CHANGE ============ */
@@ -2447,6 +2420,7 @@ function calcOnCjcChange(){
     calcScheduleUpdate();
 }
 
+/* ============ APPLY CALIBRATION (Sensor Input) ============ */
 function calcApplyCalib(){
     vibrate(20);
     const mode=calc$('sm').value;
@@ -2465,7 +2439,7 @@ function calcApplyCalib(){
             raw=calcTcK_TtoV(target)-cjcmV;
         }else if(mode==='ts')raw=calcTcS_TtoV(target);
     }else{
-        if(mode==='pt')return; // RTD tidak punya mode sensor mV
+        if(mode==='pt')return;
         const mv=calcToNum(calc$('calibSensorMv').value);
         if(isNaN(mv))return;
         raw=mv;
@@ -2479,6 +2453,8 @@ function calcApplyCalib(){
     }
     
     if(isNaN(raw)||isNaN(target))return;
+    
+    // Update mA display
     const lrv=calcToNum(calc$('lrv').value),urv=calcToNum(calc$('urv').value);
     const actionMode=(calc$('sm').value==='ma-rev')?'reverse':'direct';
     if(isNaN(lrv)||isNaN(urv))return;
@@ -2492,8 +2468,13 @@ function calcApplyCalib(){
     const displayMA=calcClamp(CALC_MA_MIN+Math.max(0,Math.min(1,pct))*CALC_MA_SPAN,2.5,22.5);
     calcEl.mi.value=displayMA.toFixed(3);
     if(!calcState.locked1)calcState.lockVal1=displayMA;
+    
+    // BARU tampilkan ADC/DAC setelah Apply ditekan
+    updateADCDisplay(raw, target);
+    
     calcScheduleUpdate();
 }
+
 function calcSp(pct,btn){
     vibrate(15);
     if(calcState.locked1||(calc$('sm').value!=='ma'&&calc$('sm').value!=='ma-rev'))return;
@@ -3600,3 +3581,5 @@ if('serviceWorker' in navigator){
     });
 }
 </script>
+</body>
+</html>
