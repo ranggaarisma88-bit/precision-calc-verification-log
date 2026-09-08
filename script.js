@@ -979,7 +979,7 @@ function calcUpdateNamurUI(mA,namurResult){
     return false;
 }
 
-/* ============ FINAL PV DENGAN PROGRESS BAR ============ */
+/* ============ FINAL PV DENGAN PROGRESS BAR (FIXED) ============ */
 function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
     const actionMode=(calc$('sm').value==='ma-rev')?'reverse':'direct';
     let dpPct;
@@ -1028,6 +1028,7 @@ function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
     const progressLinear=document.getElementById('progressLinear');
     const progressFlow=document.getElementById('progressFlow');
     const clampedPct=Math.max(0,Math.min(1,dpPct));
+    const rawPct=dpPct;
     
     if(fmMode==='dp'||fmMode==='ol'||fmMode==='gs'){
         if(progressLinear)progressLinear.style.display='none';
@@ -1044,14 +1045,14 @@ function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
         if(dpPctEl)dpPctEl.textContent=(clampedPct*100).toFixed(0)+'%';
         if(flowPctEl)flowPctEl.textContent=(flowPctVal*100).toFixed(0)+'%';
         
-        calcEl.pctDisplay.textContent='DP: '+(clampedPct*100).toFixed(1)+'% | Flow: '+(flowPctVal*100).toFixed(1)+'%';
+        calcEl.pctDisplay.textContent='DP: '+(rawPct*100).toFixed(1)+'% | Flow: '+(flowPctVal*100).toFixed(1)+'%';
     }else{
         if(progressLinear)progressLinear.style.display='block';
         if(progressFlow)progressFlow.style.display='none';
         
         const bar=document.getElementById('progressBar');
         if(bar)bar.style.width=(clampedPct*100)+'%';
-        calcEl.pctDisplay.textContent=(clampedPct*100).toFixed(1)+'%';
+        calcEl.pctDisplay.textContent=(rawPct*100).toFixed(1)+'%';
     }
     
     const dpShowMode=calc$('dpShowMode')?calc$('dpShowMode').value:'off';
