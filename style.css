@@ -1040,7 +1040,7 @@ body {
 .log-btn-reset-all:hover { background: #1a0000; border-color: #500; color: #ff4444; }
 .log-validation-msg { color: var(--red); font-size: 9px; text-align: center; margin-top: 4px; display: none; }
 .log-clamp-msg { color: var(--text3); font-size: 8px; text-align: center; margin-top: 4px; letter-spacing: 1px; }
-# log-print-header, #log-print-footer, #log-print-summary { display: none; }
+#log-print-header, #log-print-footer, #log-print-summary { display: none; }
 
 /* ==================== SIGNATURE ==================== */
 .shared-signature { text-align: center; margin-top: 16px; padding: 12px 0 3px; border-top: 1px solid var(--border2); position: relative; }
