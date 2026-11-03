@@ -3,7 +3,7 @@ function setTheme(themeName) {
     vibrate(15);
     localStorage.setItem('app_theme', themeName);
     document.documentElement.setAttribute('data-theme', themeName);
-    
+
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const themeColors = {
         industrial: '#0d0d0d',
@@ -12,13 +12,13 @@ function setTheme(themeName) {
         blue: '#0a0e1a'
     };
     if (metaTheme) metaTheme.content = themeColors[themeName] || '#0d0d0d';
-    
+
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.remove('active');
         const badge = btn.querySelector('.theme-badge');
         if (badge) badge.remove();
     });
-    
+
     const activeBtn = document.querySelector(`[data-theme-btn="${themeName}"]`);
     if (activeBtn) {
         activeBtn.classList.add('active');
@@ -26,12 +26,12 @@ function setTheme(themeName) {
             activeBtn.innerHTML += '<span class="theme-badge">DEFAULT</span>';
         }
     }
-    
+
     setTimeout(() => {
         const popup = document.getElementById('themePopup');
         if (popup) popup.classList.remove('show');
     }, 300);
-    
+
     showToast('Theme: ' + themeName);
 }
 
@@ -44,13 +44,13 @@ function toggleThemeMenu() {
 function loadTheme() {
     const saved = localStorage.getItem('app_theme') || 'industrial';
     document.documentElement.setAttribute('data-theme', saved);
-    
+
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.remove('active');
         const badge = btn.querySelector('.theme-badge');
         if (badge) badge.remove();
     });
-    
+
     const activeBtn = document.querySelector(`[data-theme-btn="${saved}"]`);
     if (activeBtn) {
         activeBtn.classList.add('active');
@@ -58,7 +58,7 @@ function loadTheme() {
             activeBtn.innerHTML += '<span class="theme-badge">DEFAULT</span>';
         }
     }
-    
+
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const themeColors = {
         industrial: '#0d0d0d',
@@ -72,7 +72,7 @@ function loadTheme() {
 function showToast(msg) {
     const existingToast = document.querySelector('.theme-toast');
     if (existingToast) existingToast.remove();
-    
+
     const toast = document.createElement('div');
     toast.className = 'theme-toast';
     toast.style.cssText = `
@@ -93,7 +93,7 @@ function showToast(msg) {
     `;
     toast.textContent = msg;
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transition = 'opacity 0.3s';
@@ -139,8 +139,8 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('click', function(e) {
     const popup = document.getElementById('themePopup');
     const themeBtn = document.querySelector('.theme-divider-btn');
-    if (popup && popup.classList.contains('show') && 
-        !popup.contains(e.target) && 
+    if (popup && popup.classList.contains('show') &&
+        !popup.contains(e.target) &&
         !themeBtn.contains(e.target)) {
         popup.classList.remove('show');
     }
@@ -319,6 +319,9 @@ function calcSanitizeInput(el){
     }
     el.value=v;
 }
+
+/* ============ SAVE STATE (di-debounce) ============ */
+let calcSaveTimer=null;
 function calcSaveState(){
     try{
         const data={
@@ -357,6 +360,10 @@ function calcSaveState(){
         }
         localStorage.setItem('calc_state',JSON.stringify(data));
     }catch(e){}
+}
+function calcSaveStateDebounced(){
+    clearTimeout(calcSaveTimer);
+    calcSaveTimer=setTimeout(calcSaveState,400);
 }
 function calcLoadState(){
     const saved=localStorage.getItem('calc_state');
@@ -553,7 +560,7 @@ function calcTglS(){
     const mode=calc$('sm').value;
     const adcDacBox=document.getElementById('adcDacInfoBox');
     const calibModeSensorBtn=document.getElementById('calibModeSensor');
-    
+
     if(mode==='ma'||mode==='ma-rev'){
         calc$('cjcBox').style.display='none';
         calcEl.actualPVbox.style.display='flex';
@@ -574,9 +581,9 @@ function calcTglS(){
         calc$('calibBox').style.display='block';
         if(adcDacBox)adcDacBox.style.display='block';
         calcUpdateCalibUnitLabel();
-        
+
         updateADCDisplay(NaN,NaN);
-        
+
         if(calibModeSensorBtn){
             if(mode==='tk'||mode==='ts'){
                 calibModeSensorBtn.style.display='block';
@@ -587,7 +594,7 @@ function calcTglS(){
                 }
             }
         }
-        
+
         if(calibMode==='target'){calcCalibToRaw();}else{calcMvToTarget();}
         calcDampedValue=CALC_MA_MIN;
         calcEl.dampedDisplay.textContent='';
@@ -622,7 +629,7 @@ function calcUpdateCalibUnitLabel(){
     const mode = calc$('sm').value;
     const lbl = calc$('calibUnitLabel');
     const rawLabel = document.querySelector('#calibTargetMode .calc-row .calc-col:nth-child(2) .calc-label');
-    
+
     if (mode === 'pt') {
         if (lbl) lbl.textContent = 'Ω';
         if (rawLabel) rawLabel.textContent = 'Resistance (Ω)';
@@ -654,13 +661,13 @@ function calcSetCalibMode(mode){
 function updateSensorRangeDisplay(mode) {
     const el1 = document.getElementById('sensorRangeDisplay');
     const el2 = document.getElementById('sensorRangeDisplay2');
-    
+
     const ranges = {
         pt: 'Range: 18 - 390 Ω',
         tk: 'Range: -6.5 - 54.8 mV',
         ts: 'Range: -0.236 - 18.693 mV'
     };
-    
+
     const text = ranges[mode] || '';
     if (el1) el1.innerText = text;
     if (el2) el2.innerText = text;
@@ -671,18 +678,18 @@ function updateADCDisplay(rawValue, targetValue) {
     const adcEl = document.getElementById('adcValueDisplay');
     const dacEl = document.getElementById('dacValueDisplay');
     const dacMaEl = document.getElementById('dacMaDisplay');
-    
+
     if (!adcEl || !dacEl || !dacMaEl) return;
-    
+
     const mode = calc$('sm').value;
-    
+
     if (isNaN(rawValue) || !mode || mode === 'ma' || mode === 'ma-rev' || isNaN(targetValue)) {
         adcEl.innerText = '---';
         dacEl.innerText = '---';
         dacMaEl.innerText = '---';
         return;
     }
-    
+
     const rawRanges = {
         pt: { min: 18, max: 390 },
         tk: { min: -6.5, max: 54.8 },
@@ -691,16 +698,16 @@ function updateADCDisplay(rawValue, targetValue) {
     const range = rawRanges[mode];
     const pct = Math.max(0, Math.min(1, (rawValue - range.min) / (range.max - range.min)));
     const adcValue = Math.round(pct * 16777215);
-    
+
     adcEl.innerText = adcValue.toLocaleString();
-    
+
     const lrv = calcToNum(calc$('lrv').value);
     const urv = calcToNum(calc$('urv').value);
     if (!isNaN(lrv) && !isNaN(urv) && urv > lrv) {
         const targetPct = Math.max(0, Math.min(1, (targetValue - lrv) / (urv - lrv)));
         const dacValue = Math.round(targetPct * 65535);
         const dacMa = 4 + targetPct * 16;
-        
+
         dacEl.innerText = dacValue.toLocaleString();
         dacMaEl.innerText = dacMa.toFixed(3) + ' mA';
     } else {
@@ -709,10 +716,10 @@ function updateADCDisplay(rawValue, targetValue) {
     }
 }
 
-/* ============ MODE TARGET: Input °C → Output mV/Ω ============ */
+/* ============ MODE TARGET ============ */
 function calcCalibToRaw(){
     const mode=calc$('sm').value,outEl=calc$('calibRawOut');
-    
+
     const rawLabel = document.querySelector('#calibTargetMode .calc-row .calc-col:nth-child(2) .calc-label');
     if (rawLabel) {
         if (mode === 'pt') {
@@ -723,7 +730,7 @@ function calcCalibToRaw(){
             rawLabel.textContent = 'Raw Output';
         }
     }
-    
+
     if(mode==='ma'||mode==='ma-rev'){
         outEl.value='';
         updateADCDisplay(NaN,NaN);
@@ -737,7 +744,7 @@ function calcCalibToRaw(){
         updateADCDisplay(NaN,NaN);
         return;
     }
-    
+
     let raw=NaN,unitLabel='';
     if(mode==='pt'){
         raw=calcPT100_TtoR(target);
@@ -751,17 +758,17 @@ function calcCalibToRaw(){
         raw=calcTcS_TtoV(target);
         unitLabel='mV';
     }
-    
+
     outEl.value=isNaN(raw)?'--':raw.toFixed(3)+' '+unitLabel;
     updateADCDisplay(NaN,NaN);
 }
 
-/* ============ MODE SENSOR: Input mV → Output °C ============ */
+/* ============ MODE SENSOR ============ */
 function calcMvToTarget(){
     const mode=calc$('sm').value;
     const outEl=calc$('calibTempOut');
     const mvEl=calc$('calibSensorMv');
-    
+
     if(mode==='ma'||mode==='ma-rev'||mode==='pt'){
         if(outEl)outEl.value='';
         updateADCDisplay(NaN,NaN);
@@ -775,7 +782,7 @@ function calcMvToTarget(){
         updateADCDisplay(NaN,NaN);
         return;
     }
-    
+
     let temp=NaN;
     if(mode==='tk'){
         const cjcTemp=calcToNum(calc$('cjcTemp').value);
@@ -784,7 +791,7 @@ function calcMvToTarget(){
     }else if(mode==='ts'){
         temp=calcTcS_VtoT(mv);
     }
-    
+
     if(outEl)outEl.value=isNaN(temp)?'--':temp.toFixed(3)+' °C';
     updateADCDisplay(NaN,NaN);
 }
@@ -805,10 +812,10 @@ function calcApplyCalib(){
     vibrate(20);
     const mode=calc$('sm').value;
     if(mode==='ma'||mode==='ma-rev')return;
-    
+
     let target=NaN;
     let raw=NaN;
-    
+
     if(calibMode==='target'){
         target=calcToNum(calc$('calibTarget').value);
         if(isNaN(target))return;
@@ -831,9 +838,9 @@ function calcApplyCalib(){
             target=calcTcS_VtoT(mv);
         }
     }
-    
+
     if(isNaN(raw)||isNaN(target))return;
-    
+
     const lrv=calcToNum(calc$('lrv').value),urv=calcToNum(calc$('urv').value);
     const actionMode=(calc$('sm').value==='ma-rev')?'reverse':'direct';
     if(isNaN(lrv)||isNaN(urv))return;
@@ -847,9 +854,9 @@ function calcApplyCalib(){
     const displayMA=calcClamp(CALC_MA_MIN+Math.max(0,Math.min(1,pct))*CALC_MA_SPAN,2.5,22.5);
     calcEl.mi.value=displayMA.toFixed(3);
     if(!calcState.locked1)calcState.lockVal1=displayMA;
-    
+
     updateADCDisplay(raw, target);
-    
+
     calcScheduleUpdate();
 }
 
@@ -979,7 +986,7 @@ function calcUpdateNamurUI(mA,namurResult){
     return false;
 }
 
-/* ============ FINAL PV DENGAN PROGRESS BAR (FIXED TOTAL) ============ */
+/* ============ FINAL PV ============ */
 function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
     const actionMode=(calc$('sm').value==='ma-rev')?'reverse':'direct';
     let dpPct;
@@ -988,85 +995,74 @@ function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
     }else{
         dpPct=(mA-CALC_MA_MIN)/CALC_MA_SPAN;
     }
-    
+
     let result;
-    
+
     if(fmMode==='ln'){
-        // Mode Linear biasa
         result=lrv+dpPct*(urv-lrv);
     }else{
-        // --- MODE GAS/STEAM (Mengikuti Rumus Transmitter) ---
         const clampedDpPct=Math.max(0,Math.min(1,dpPct));
-        
-        // 1. Ambil input DP aktual dari user
+
         const dpLrv=calcToNum(calc$('dpLrv').value) || 0;
         const dpUrv=calcToNum(calc$('dpUrv').value) || 0;
         const dpActual = dpLrv + (dpPct * (dpUrv - dpLrv));
         const dpPositif = dpActual > 0 ? dpActual : 0;
 
-        // 2. Ambil K-Factor (Flow Fix Calc) dari user (7610.27)
         const ffcVal=calc$('ffc').value.trim();
         const ffc=ffcVal!==''?calcToNum(ffcVal):7610.27;
 
-        // 3. HITUNG FLOW DASAR (K * Akar DP)
         let baseFlow = ffc * Math.sqrt(dpPositif);
         result = baseFlow;
 
-        // 4. KOMPENSASI TEKANAN & SUHU (Hanya jika mode GAS/STEAM)
         if(fmMode==='gs' && dpPositif > 0){
             const tdR=calcToNum(calc$('td').value), taR=calcToNum(calc$('ta').value);
             const pdR=calcToNum(calc$('pd').value), paR=calcToNum(calc$('pa').value);
-            
+
             if(!isNaN(tdR)&&!isNaN(taR)&&!isNaN(pdR)&&!isNaN(paR)){
-                // Konversi ke Kelvin & Absolut
                 const Td = tdR + 273.15;
                 const Ta = taR + 273.15;
                 const Pd = pdR + 1.01325;
                 const Pa = paR + 1.01325;
-                
-                // Rumus Hukum Gas Ideal
+
                 let cf = Math.sqrt(Pa/Pd) * Math.sqrt(Td/Ta);
                 result *= cf;
             }
         }
     }
-    
-    // Tampilkan Hasil
+
     calcEl.pvVal.innerText=result.toFixed(2);
     calcEl.pvUnit.innerText=unit;
-    
-    // --- PROGRESS BAR (TETAP SEPERTI ASLINYA) ---
+
     const progressLinear=document.getElementById('progressLinear');
     const progressFlow=document.getElementById('progressFlow');
     const clampedPct=Math.max(0,Math.min(1,dpPct));
     const rawPct=dpPct;
-    
+
     if(fmMode==='dp'||fmMode==='ol'||fmMode==='gs'){
         if(progressLinear)progressLinear.style.display='none';
         if(progressFlow)progressFlow.style.display='block';
-        
+
         const flowPctVal=Math.sqrt(clampedPct);
         const dpBar=document.getElementById('dpProgressBar');
         const flowBar=document.getElementById('flowProgressBar');
         const dpPctEl=document.getElementById('dpPctDisplay');
         const flowPctEl=document.getElementById('flowPctDisplay');
-        
+
         if(dpBar)dpBar.style.width=(clampedPct*100)+'%';
         if(flowBar)flowBar.style.width=(flowPctVal*100)+'%';
         if(dpPctEl)dpPctEl.textContent=(clampedPct*100).toFixed(0)+'%';
         if(flowPctEl)flowPctEl.textContent=(flowPctVal*100).toFixed(0)+'%';
-        
+
         calcEl.pctDisplay.textContent='DP: '+(rawPct*100).toFixed(1)+'% | Flow: '+(flowPctVal*100).toFixed(1)+'%';
     }else{
         if(progressLinear)progressLinear.style.display='block';
         if(progressFlow)progressFlow.style.display='none';
-        
+
         const bar=document.getElementById('progressBar');
         if(bar)bar.style.width=(clampedPct*100)+'%';
         calcEl.pctDisplay.textContent=(rawPct*100).toFixed(1)+'%';
     }
-    
-    // Tampilkan info DP di bawah kotak hijau
+
     const dpShowMode=calc$('dpShowMode')?calc$('dpShowMode').value:'off';
     if(fmMode!=='ln'&&dpShowMode==='on'){
         const dpLrvVal=calcToNum(calc$('dpLrv').value);
@@ -1084,18 +1080,18 @@ function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
     }else{
         if(calc$('dpInfoLine'))calc$('dpInfoLine').style.display='none';
     }
-    
+
     return dpPct;
 }
 
 function calcUpdatePLCRegister(pctElecUncapped){
     const pbVal=calc$('pb').value;
     const plcRangeEl=document.getElementById('plcRangeDisplay');
-    
+
     if(pbVal!=='hi'){
         let reg;
         let rangeText='';
-        
+
         if(pbVal==='abraw'){
             reg=Math.round(CALC_AB_RAW_LOW+calcClamp(pctElecUncapped,0,1)*(CALC_AB_RAW_HIGH-CALC_AB_RAW_LOW));
             rangeText='Range: ' + CALC_AB_RAW_LOW.toLocaleString() + ' - ' + CALC_AB_RAW_HIGH.toLocaleString() + ' (AB Raw)';
@@ -1105,7 +1101,7 @@ function calcUpdatePLCRegister(pctElecUncapped){
             reg=Math.round(calcClamp(pctElecUncapped,0,1)*maxReg);
             rangeText='Range: 0 - ' + maxReg.toLocaleString() + ' (' + plcName + ')';
         }
-        
+
         calcEl.pr.innerText=reg.toLocaleString();
         if(plcRangeEl)plcRangeEl.innerText=rangeText;
     }
@@ -1137,15 +1133,13 @@ function calcUpdateTable(lrv,urv,unit,fmMode){
         if(fmMode==='ln'){
             cr=lrv+cp*(urv-lrv);
         }else{
-            // Hitung Flow Dasar (K * Akar DP)
             const dpLrv=calcToNum(calc$('dpLrv').value) || 0;
             const dpUrv=calcToNum(calc$('dpUrv').value) || 0;
             const dpActual = dpLrv + (cp * (dpUrv - dpLrv));
             const dpPositif = dpActual > 0 ? dpActual : 0;
-            
-            cr = ffcR * Math.sqrt(dpPositif); // JANGAN dibagi 100
 
-            // Kompensasi Gas
+            cr = ffcR * Math.sqrt(dpPositif);
+
             if(cp>0.002&&(fmMode==='ol'||fmMode==='gs')&&!isNaN(tdR)&&!isNaN(taR)&&tdR>-273&&taR>-273){
                 let cf=Math.sqrt((tdR+273.15)/(taR+273.15));
                 if(fmMode==='gs'&&!isNaN(pdR)&&!isNaN(paR)){
@@ -1155,7 +1149,7 @@ function calcUpdateTable(lrv,urv,unit,fmMode){
                 cr*=cf;
             }
         }
-        
+
         let rawCell='';
         if(rawLabel){
             let rawVal=NaN;
@@ -1178,7 +1172,7 @@ function calcUpd(){
           fmMode=calc$('fm').value;
     calcEl.actualUnitLbl.textContent=unit;
     calcEl.rangeError.style.display=(!isNaN(lrv)&&!isNaN(urv)&&urv<=lrv)?'block':'none';
-    
+
     if(isNaN(mA)){
         const pb=document.getElementById('progressBar');
         const dpb=document.getElementById('dpProgressBar');
@@ -1186,7 +1180,7 @@ function calcUpd(){
         if(pb)pb.style.width='0%';
         if(dpb)dpb.style.width='0%';
         if(flb)flb.style.width='0%';
-        
+
         calcEl.pvVal.innerText='---';
         calcEl.pvUnit.innerText='';
         calcEl.pctDisplay.innerText='0.0%';
@@ -1206,7 +1200,7 @@ function calcUpd(){
     const pctElecUncapped=calcUpdateFinalPV(mA,lrv,urv,unit,fmMode);
     calcUpdatePLCRegister(pctElecUncapped);
     if(calcRefMode==='standard')calcUpdateTable(lrv,urv,unit,fmMode);
-    calcSaveState();
+    calcSaveStateDebounced();
 }
 
 /* ==================== REFERENCE TABLE ==================== */
@@ -1332,14 +1326,14 @@ function calcClr(){
     calcBuildRegularButtons();
     calcResetNamurState();
     calcResetDamping();
-    
+
     const pb=document.getElementById('progressBar');
     const dpb=document.getElementById('dpProgressBar');
     const flb=document.getElementById('flowProgressBar');
     if(pb)pb.style.width='0%';
     if(dpb)dpb.style.width='0%';
     if(flb)flb.style.width='0%';
-    
+
     updateADCDisplay(NaN,NaN);
     updateSensorRangeDisplay('');
     const plcRangeEl=document.getElementById('plcRangeDisplay');
@@ -1380,32 +1374,21 @@ function logPT100_RtoT(R){
     }
     return T;
 }
-const LOG_NKmV=[0,2.5173462e-2,-1.1662878e-6,-1.0833638e-9,-8.977354e-13,-3.7342377e-16,-8.6632643e-20,-1.0450598e-23,-5.1920577e-28,0];
-const LOG_NKlo=[0,3.9450128025e-2,2.3622373598e-5,-3.2858906784e-7,-4.9904828777e-9,-6.7509059173e-11,-5.7410327428e-13,-3.1088872894e-15,-1.0451609365e-17,-1.9889266878e-20,-1.6322697486e-23];
-const LOG_NKhi=[-1.7600413686e-2,3.8921204975e-2,1.8558770032e-5,-9.9457592874e-8,3.1840945719e-10,-5.6072844889e-13,5.6075059059e-16,-3.2020720003e-19,9.7151147152e-23,-1.2104721275e-26];
-const LOG_NSmV=[0,1.8494946e-2,-8.00504062e-6,1.0223743e-8,-1.52248592e-11,1.88821343e-14,-1.59085941e-17,8.2302788e-21,-2.34181944e-24,2.7978626e-28];
-const LOG_NSTmV=[0,5.40313308e-2,1.2593342e-5,-2.04405043e-8,3.17533172e-11,-4.68917176e-14,5.89025127e-17,-6.25331094e-20,5.74008144e-23,-4.47813056e-26];
-function logTk_mVtoT_raw(mV){
-    let T=0;
-    for(let i=0;i<LOG_NKmV.length;i++)T+=LOG_NKmV[i]*Math.pow(mV,i);
-    return T;
-}
+
+/* ---------- FIX: Koefisien TC di tab Log disamakan dengan CALC_* (yang benar) ---------- */
 function logTk_TtomV_raw(T){
-    const c=T<0?LOG_NKlo:LOG_NKhi;
-    let mV=0;
-    for(let i=0;i<c.length;i++)mV+=c[i]*Math.pow(T,i);
-    return mV;
+    return calcTcK_TtoV(T);
 }
-function logTs_mVtoT_raw(mV){
-    let T=0;
-    for(let i=0;i<LOG_NSmV.length;i++)T+=LOG_NSmV[i]*Math.pow(mV,i);
-    return T;
+function logTk_mVtoT_raw(mV){
+    return calcTcK_mVToTemp(mV);
 }
 function logTs_TtomV_raw(T){
-    let mV=0;
-    for(let i=0;i<LOG_NSTmV.length;i++)mV+=LOG_NSTmV[i]*Math.pow(T,i);
-    return mV;
+    return calcTcS_TtoV(T);
 }
+function logTs_mVtoT_raw(mV){
+    return calcTcS_VtoT(mV);
+}
+
 function logGetCJ(){
     const m=log$('log-vMode').value;
     if(m!=='tk'&&m!=='ts')return 0;
@@ -1580,19 +1563,29 @@ function logRebuildTable(){
     log$('log-logBody').innerHTML='';
     logData.forEach((l,idx)=>logAppendRow(l,idx));
 }
+
+/* ---------- FIX: PASS/FAIL pakai toleransi dalam % span, bukan unit PV ---------- */
+function logTolToPct(){
+    const tolVal = logGetTolValue();       // dalam unit PV (°C, bar, dsb.)
+    if (tolVal === null) return null;
+    const span = logGetSpan();             // URV - LRV, dalam unit PV
+    if (!span || span <= 0) return null;
+    return (tolVal / span) * 100;          // konversi ke % span
+}
+
 function logAppendRow(l,idx){
     const body=log$('log-logBody'),
           row=body.insertRow(-1);
     row.className='log-tr';
-    const tolVal=logGetTolValue(),
-          errNum=parseFloat(l.err);
+    const tolPct = logTolToPct();
+    const errNum = parseFloat(l.err);
     let status='-',statusClass='';
-    if(tolVal!==null){
-        const passed=Math.abs(errNum)<=tolVal;
-        status=passed?'PASS':'FAIL';
-        statusClass=passed?'pass':'fail';
+    if (tolPct !== null) {
+        const passed = Math.abs(errNum) <= tolPct;
+        status = passed ? 'PASS' : 'FAIL';
+        statusClass = passed ? 'pass' : 'fail';
     }
-    row.innerHTML=`<td class="log-td">${l.dir}</td><td class="log-td">${l.act}</td><td class="log-td">${parseFloat(l.meas).toFixed(3)}</td><td class="log-td">${parseFloat(l.pv).toFixed(3)}</td><td class="log-td">${parseFloat(l.target).toFixed(3)}</td><td class="log-td" style="color:${tolVal!==null?(Math.abs(errNum)<=tolVal?'green':'red'):'var(--text3)'}">${l.err}%</td><td class="log-td ${statusClass}">${status}</td><td class="log-td log-no-print"><button class="log-btn-del-box" onclick="logDeleteRow(${idx})">x</button></td>`;
+    row.innerHTML=`<td class="log-td">${l.dir}</td><td class="log-td">${l.act}</td><td class="log-td">${parseFloat(l.meas).toFixed(3)}</td><td class="log-td">${parseFloat(l.pv).toFixed(3)}</td><td class="log-td">${parseFloat(l.target).toFixed(3)}</td><td class="log-td" style="color:${tolPct!==null?(Math.abs(errNum)<=tolPct?'green':'red'):'var(--text3)'}">${l.err}%</td><td class="log-td ${statusClass}">${status}</td><td class="log-td log-no-print"><button class="log-btn-del-box" onclick="logDeleteRow(${idx})">x</button></td>`;
 }
 function logDeleteRow(idx){
     vibrate(20);
@@ -1743,6 +1736,8 @@ function logAddLog(){
     logUpd();
     logSaveLogs();
     logDrawChart();
+    // Auto Step: maju ke step berikutnya HANYA kalau sedang aktif
+    if (logAutoStepActive) logAdvanceAutoStep();
 }
 const LOG_STEPS=[0,25,50,75,100];
 let logAutoStepIdx=-1,logAutoStepActive=false;
@@ -1787,22 +1782,18 @@ function logSetAutoRef(lrv,s,i){
     btn.classList.add('running');
     log$('log-maMeasured').focus();
 }
-document.addEventListener('click',function(e){
-    if(!logAutoStepActive)return;
-    if(!e.target.classList.contains('log-btn-add'))return;
+function logAdvanceAutoStep(){
     const lrv=parseFloat(log$('log-lrv').value)||0,
           s=logGetSpan();
-    setTimeout(()=>{
-        logAutoStepIdx++;
-        if(logAutoStepIdx>=LOG_STEPS.length){
-            logAutoStepActive=false;
-            logAutoStepIdx=-1;
-            logResetAutoBtn();
-            return;
-        }
-        logSetAutoRef(lrv,s,logAutoStepIdx);
-    },350);
-},true);
+    logAutoStepIdx++;
+    if(logAutoStepIdx>=LOG_STEPS.length){
+        logAutoStepActive=false;
+        logAutoStepIdx=-1;
+        logResetAutoBtn();
+        return;
+    }
+    logSetAutoRef(lrv,s,logAutoStepIdx);
+}
 let logChartRaf=null;
 function logDrawChart(){
     if(logChartRaf)cancelAnimationFrame(logChartRaf);
@@ -1840,22 +1831,23 @@ function log_drawChart(){
     ctx.moveTo(mrg.left,midY);
     ctx.lineTo(w-mrg.right,midY);
     ctx.stroke();
-    const tolVal=logGetTolValue();
-    if(tolVal!==null&&tolVal>0&&logData.length>0){
-        const maxAct=Math.max(...logData.map(d=>d.act));
-        const minAct=Math.min(...logData.map(d=>d.act));
-        const range=maxAct-minAct||1;
+
+    // FIX: garis toleransi pakai tolPct (dalam %)
+    const tolPct = logTolToPct();
+    if(tolPct!==null&&tolPct>0&&logData.length>0){
         const x1=mrg.left,x2=mrg.left+pw;
+        // 5% error = ph/2 (setengah tinggi). Jadi tolPct% = tolPct/5 * ph/2
+        const offset = (tolPct / 5) * (ph / 2);
         ctx.strokeStyle='#ff9500';
         ctx.lineWidth=1;
         ctx.setLineDash([4,4]);
         ctx.beginPath();
-        ctx.moveTo(x1,midY-ph*(tolVal/(range*2)*2));
-        ctx.lineTo(x2,midY-ph*(tolVal/(range*2)*2));
+        ctx.moveTo(x1,midY-offset);
+        ctx.lineTo(x2,midY-offset);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(x1,midY+ph*(tolVal/(range*2)*2));
-        ctx.lineTo(x2,midY+ph*(tolVal/(range*2)*2));
+        ctx.moveTo(x1,midY+offset);
+        ctx.lineTo(x2,midY+offset);
         ctx.stroke();
         ctx.setLineDash([]);
     }
@@ -1925,15 +1917,18 @@ function logSavePdf(){
         log$('log-p-tolerance').innerText='VERIFICATION ONLY';
         log$('log-p-tolerance').style.color='#666';
     }
+
+    // FIX: summary pakai tolPct (dalam %)
     const total=logData.length;
+    const tolPct = logTolToPct();
     let pass=0;
     logData.forEach(l=>{
-        if(tolVal!==null&&Math.abs(parseFloat(l.err))<=tolVal)pass++;
+        if(tolPct!==null && Math.abs(parseFloat(l.err))<=tolPct) pass++;
     });
     if(total===0){
         log$('log-p-summary-result').innerHTML='<span style="color:#333;">NO DATA</span>';
         log$('log-p-summary-detail').innerText='No verification points recorded.';
-    }else if(tolVal===null){
+    }else if(tolPct===null){
         log$('log-p-summary-result').innerHTML='<span style="color:#333;">VERIFICATION ONLY</span>';
         log$('log-p-summary-detail').innerHTML='<span style="color:#333;">'+total+' points recorded (no tolerance)</span>';
     }else{
@@ -1944,12 +1939,12 @@ function logSavePdf(){
     }
     logSaveSettings();
     window._printing=true;
-    logDrawChart();
-    setTimeout(()=>{window.print();},200);
+    log_drawChart();  // sync, bukan RAF — supaya pasti tergambar sebelum print
+    setTimeout(()=>{window.print();},100);
     setTimeout(()=>{window._printing=false;logDrawChart();},1000);
 }
 
-/* ==================== PWA ==================== */
+/* ==================== PWA INSTALL PROMPT ==================== */
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',e=>{
     e.preventDefault();
@@ -2012,10 +2007,43 @@ window.addEventListener('beforeunload',()=>{
     logSaveSettings();
     logSaveLogs();
 });
-if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{
-        navigator.serviceWorker.register('./sw.js')
-            .then(r=>console.log('SW:',r.scope))
-            .catch(e=>console.log('SW:',e));
+
+/* ==================== SERVICE WORKER (FIXED) ==================== */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+        try {
+            const reg = await navigator.serviceWorker.register('./sw.js', {
+                updateViaCache: 'none'   // KRITIS: jangan cache sw.js di HTTP cache
+            });
+
+            // 1) Cek update setiap 60 detik (dan saat tab aktif kembali)
+            setInterval(() => reg.update().catch(() => {}), 60_000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    reg.update().catch(() => {});
+                }
+            });
+
+            // 2) Kalau ada SW baru siap, paksa aktif
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        newWorker.postMessage('SKIP_WAITING');
+                    }
+                });
+            });
+
+            // 3) Reload otomatis saat SW baru mengambil alih
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+        } catch (e) {
+            console.warn('SW register gagal:', e);
+        }
     });
 }
