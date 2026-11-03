@@ -1,10 +1,12 @@
 // sw.js - Precision Calc & Verification Log
 // SUPER AGRESIF - Paksa update semua file
 
-const CACHE_NAME = 'precision-calc-v' + Date.now();
+const CACHE_NAME = 'precision-calc-v2-' + Date.now();
 const ASSETS = [
   './',
   './index.html',
+  './script.js',     // Wajib ada agar JS bisa jalan offline
+  './style.css',     // Wajib ada agar tampilan tidak berantakan offline
   './manifest.json',
   './icon.svg',
   './icon-192.png',
