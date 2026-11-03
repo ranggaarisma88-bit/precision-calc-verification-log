@@ -979,7 +979,7 @@ function calcUpdateNamurUI(mA,namurResult){
     return false;
 }
 
-/* ============ FINAL PV DENGAN PROGRESS BAR (FIXED) ============ */
+/* ============ FINAL PV DENGAN PROGRESS BAR (FIXED TOTAL) ============ */
 function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
     const actionMode=(calc$('sm').value==='ma-rev')?'reverse':'direct';
     let dpPct;
@@ -990,41 +990,52 @@ function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
     }
     
     let result;
+    
     if(fmMode==='ln'){
+        // Mode Linear biasa
         result=lrv+dpPct*(urv-lrv);
     }else{
+        // --- MODE GAS/STEAM (Mengikuti Rumus Transmitter) ---
         const clampedDpPct=Math.max(0,Math.min(1,dpPct));
-        const flowPct=Math.sqrt(clampedDpPct);
-        result=lrv+flowPct*(urv-lrv);
-        if(flowPct>0.001&&(fmMode==='ol'||fmMode==='gs')){
-            const tdR=calcToNum(calc$('td').value),taR=calcToNum(calc$('ta').value);
-            if(!isNaN(tdR)&&!isNaN(taR)&&tdR>-273&&taR>-273){
-                const denom=taR+273.15;
-                if(Math.abs(denom)>0.001){
-                    let cf=Math.sqrt((tdR+273.15)/denom);
-                    if(fmMode==='gs'){
-                        const pdR=calcToNum(calc$('pd').value),paR=calcToNum(calc$('pa').value);
-                        if(!isNaN(pdR)&&!isNaN(paR)){
-                            const Pd=pdR+1.01325,Pa=paR+1.01325;
-                            if(Pd>0&&Pa>0)cf*=Math.sqrt(Pa/Pd);
-                        }
-                    }
-                    result*=cf;
-                }
+        
+        // 1. Ambil input DP aktual dari user
+        const dpLrv=calcToNum(calc$('dpLrv').value) || 0;
+        const dpUrv=calcToNum(calc$('dpUrv').value) || 0;
+        const dpActual = dpLrv + (dpPct * (dpUrv - dpLrv));
+        const dpPositif = dpActual > 0 ? dpActual : 0;
+
+        // 2. Ambil K-Factor (Flow Fix Calc) dari user (7610.27)
+        const ffcVal=calc$('ffc').value.trim();
+        const ffc=ffcVal!==''?calcToNum(ffcVal):7610.27;
+
+        // 3. HITUNG FLOW DASAR (K * Akar DP)
+        let baseFlow = ffc * Math.sqrt(dpPositif);
+        result = baseFlow;
+
+        // 4. KOMPENSASI TEKANAN & SUHU (Hanya jika mode GAS/STEAM)
+        if(fmMode==='gs' && dpPositif > 0){
+            const tdR=calcToNum(calc$('td').value), taR=calcToNum(calc$('ta').value);
+            const pdR=calcToNum(calc$('pd').value), paR=calcToNum(calc$('pa').value);
+            
+            if(!isNaN(tdR)&&!isNaN(taR)&&!isNaN(pdR)&&!isNaN(paR)){
+                // Konversi ke Kelvin & Absolut
+                const Td = tdR + 273.15;
+                const Ta = taR + 273.15;
+                const Pd = pdR + 1.01325;
+                const Pa = paR + 1.01325;
+                
+                // Rumus Hukum Gas Ideal
+                let cf = Math.sqrt(Pa/Pd) * Math.sqrt(Td/Ta);
+                result *= cf;
             }
         }
     }
-    const ffm=calc$('ffm').value;
-    if(ffm==='on'){
-        const ffcVal=calc$('ffc').value.trim();
-        const ffc=ffcVal!==''?calcToNum(ffcVal):100;
-        if(!isNaN(ffc)&&ffc>0){
-            result=result*(ffc/100);
-        }
-    }
-    calcEl.pvVal.innerText=result.toFixed(3);
+    
+    // Tampilkan Hasil
+    calcEl.pvVal.innerText=result.toFixed(2);
     calcEl.pvUnit.innerText=unit;
     
+    // --- PROGRESS BAR (TETAP SEPERTI ASLINYA) ---
     const progressLinear=document.getElementById('progressLinear');
     const progressFlow=document.getElementById('progressFlow');
     const clampedPct=Math.max(0,Math.min(1,dpPct));
@@ -1055,16 +1066,17 @@ function calcUpdateFinalPV(mA,lrv,urv,unit,fmMode){
         calcEl.pctDisplay.textContent=(rawPct*100).toFixed(1)+'%';
     }
     
+    // Tampilkan info DP di bawah kotak hijau
     const dpShowMode=calc$('dpShowMode')?calc$('dpShowMode').value:'off';
     if(fmMode!=='ln'&&dpShowMode==='on'){
-        const dpLrv=calcToNum(calc$('dpLrv').value);
-        const dpUrv=calcToNum(calc$('dpUrv').value);
-        if(!isNaN(dpLrv)&&!isNaN(dpUrv)&&dpUrv>dpLrv){
-            const dpActual=dpLrv+dpPct*(dpUrv-dpLrv);
+        const dpLrvVal=calcToNum(calc$('dpLrv').value);
+        const dpUrvVal=calcToNum(calc$('dpUrv').value);
+        if(!isNaN(dpLrvVal)&&!isNaN(dpUrvVal)&&dpUrvVal>dpLrvVal){
+            const dpActualInfo=dpLrvVal+dpPct*(dpUrvVal-dpLrvVal);
             const dpUnitVal=calc$('dpUnit')?calc$('dpUnit').value.trim():'';
             const dpUnit=dpUnitVal!==''?dpUnitVal:'mbar';
             if(calc$('dpInfoLine'))calc$('dpInfoLine').style.display='block';
-            if(calc$('dpVal'))calc$('dpVal').innerText=dpActual.toFixed(2);
+            if(calc$('dpVal'))calc$('dpVal').innerText=dpActualInfo.toFixed(2);
             if(calc$('dpUnitDisplay'))calc$('dpUnitDisplay').innerText=dpUnit;
         }else{
             if(calc$('dpInfoLine'))calc$('dpInfoLine').style.display='none';
@@ -1110,7 +1122,7 @@ function calcUpdateTable(lrv,urv,unit,fmMode){
           pdR=calcToNum(calc$('pd').value),
           paR=calcToNum(calc$('pa').value);
     const ffcVal=calc$('ffc').value.trim();
-    const ffcR=ffcVal!==''?calcToNum(ffcVal):100;
+    const ffcR=ffcVal!==''?calcToNum(ffcVal):7610.27;
     const ffmR=calc$('ffm').value;
     const smR=calc$('sm').value;
     const cjcR=smR==='tk'?calcToNum(calc$('cjcTemp').value):NaN;
@@ -1125,21 +1137,25 @@ function calcUpdateTable(lrv,urv,unit,fmMode){
         if(fmMode==='ln'){
             cr=lrv+cp*(urv-lrv);
         }else{
-            cr=lrv+Math.sqrt(calcClamp(cp,0,1))*(urv-lrv);
-        }
-        if(cp>0.002&&(fmMode==='ol'||fmMode==='gs')&&!isNaN(tdR)&&!isNaN(taR)&&tdR>-273&&taR>-273){
-            let cf=Math.sqrt((tdR+273.15)/(taR+273.15));
-            if(fmMode==='gs'&&!isNaN(pdR)&&!isNaN(paR)){
-                const Pd=pdR+1.01325,Pa=paR+1.01325;
-                if(Pd>0&&Pa>0)cf*=Math.sqrt(Pa/Pd);
+            // Hitung Flow Dasar (K * Akar DP)
+            const dpLrv=calcToNum(calc$('dpLrv').value) || 0;
+            const dpUrv=calcToNum(calc$('dpUrv').value) || 0;
+            const dpActual = dpLrv + (cp * (dpUrv - dpLrv));
+            const dpPositif = dpActual > 0 ? dpActual : 0;
+            
+            cr = ffcR * Math.sqrt(dpPositif); // JANGAN dibagi 100
+
+            // Kompensasi Gas
+            if(cp>0.002&&(fmMode==='ol'||fmMode==='gs')&&!isNaN(tdR)&&!isNaN(taR)&&tdR>-273&&taR>-273){
+                let cf=Math.sqrt((tdR+273.15)/(taR+273.15));
+                if(fmMode==='gs'&&!isNaN(pdR)&&!isNaN(paR)){
+                    const Pd=pdR+1.01325,Pa=paR+1.01325;
+                    if(Pd>0&&Pa>0)cf*=Math.sqrt(Pa/Pd);
+                }
+                cr*=cf;
             }
-            cr*=cf;
         }
-        if(ffmR==='on'){
-            if(!isNaN(ffcR)&&ffcR>0){
-                cr=cr*(ffcR/100);
-            }
-        }
+        
         let rawCell='';
         if(rawLabel){
             let rawVal=NaN;
