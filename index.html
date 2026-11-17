@@ -6,24 +6,17 @@
     <meta name="author" content="RANGGA.A">
     <title>Signal Converter & Verification Log</title>
 
-    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#0d0d0d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Signal Converter">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="icon" type="image/svg+xml" href="./icon.svg">
-    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-    <link rel="apple-touch-icon" href="./icon-192.png">
     <meta property="og:title" content="Signal Converter & Verification Log">
     <meta property="og:description" content="Professional Signal Converter & Calibration Logger.">
-    <meta property="og:image" content="./icon-512.png">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary">
     <meta name="description" content="Professional Signal Converter & Calibration Logger.">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23121212'/%3E%3Crect x='2' y='2' width='28' height='28' rx='7' fill='none' stroke='%23c9a830' stroke-width='1.5'/%3E%3Cpath d='M17.5 6L9.5 17.5H15.5L14 26L22.5 14H16.5L17.5 6Z' fill='%23c9a830'/%3E%3C/svg%3E">
 
     <link rel="stylesheet" href="./style.css">
 </head>
@@ -32,7 +25,13 @@
     <div class="shared-header">
         <div class="brand">ELECTRICAL &amp; INSTRUMENT</div>
         <div class="sub-brand">DEPARTMENT</div>
-        <div class="lightning">⚡</div>
+        <div class="lightning" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="13.5" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.45"/>
+                <path d="M16 1.5V4.5M16 27.5V30.5M1.5 16H4.5M27.5 16H30.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
+                <path d="M17.8 6.5L10.2 17.2H15.6L14.2 25.5L21.8 14.6H16.4L17.8 6.5Z" fill="currentColor" stroke="currentColor" stroke-width="0.6" stroke-linejoin="round"/>
+            </svg>
+        </div>
         <button class="header-info-btn" onclick="openSpecModal()" title="Technical Specifications">ⓘ</button>
     </div>
     
@@ -93,6 +92,7 @@
             
             <div id="dpInfoLine" style="font-size:9px;color:var(--gold);margin-top:4px;display:none;">
                 DP: <span id="dpVal">0.00</span> <span id="dpUnitDisplay">mbar</span>
+                <span id="cfInfoText" style="color:var(--text3);margin-left:6px;"></span>
             </div>
         </div>
 
@@ -129,7 +129,7 @@
                     </div>
                 </div>
             </div>
-            <div class="calc-row">
+            <div id="tempCompRow" class="calc-row" style="display:none;">
                 <div class="calc-col">
                     <label class="calc-label">Design T (°C)</label>
                     <input type="text" id="td" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="Design" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
@@ -137,6 +137,12 @@
                 <div class="calc-col">
                     <label class="calc-label">Actual T (°C)</label>
                     <input type="text" id="ta" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="Actual" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+            </div>
+            <div id="oilBetaRow" class="calc-row" style="display:none;">
+                <div class="calc-col">
+                    <label class="calc-label">Thermal Exp β (/°C)</label>
+                    <input type="text" id="oilBeta" value="0.00085" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0.00085" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
                 </div>
             </div>
             <div id="go" class="calc-row" style="display:none">
@@ -151,11 +157,11 @@
             </div>
             <div id="ff" class="calc-row" style="display:none">
                 <div class="calc-col">
-                    <label class="calc-label">Flow Fix Calc</label>
+                    <label class="calc-label">Flow Fix (%)</label>
                     <input type="text" id="ffc" placeholder="100" oninput="calcSanitizeInput(this);calcOnParamChange()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
                 </div>
                 <div class="calc-col">
-                    <label class="calc-label">Mode</label>
+                    <label class="calc-label">Flow Fix Mode</label>
                     <select id="ffm" onchange="calcOnParamChange()" class="calc-select">
                         <option value="off">OFF</option>
                         <option value="on">ON</option>
@@ -171,12 +177,21 @@
             <option value="pt">RTD PT100 IEC 60751</option>
             <option value="tk">TC TYPE K NIST</option>
             <option value="ts">TC TYPE S NIST</option>
+            <option value="tj">TC TYPE J NIST</option>
         </select>
         <div id="cjcBox" style="display:none;margin:8px 0">
             <div class="calc-row">
                 <div class="calc-col">
                     <label class="calc-label">CJC Temp (°C)</label>
                     <input type="text" id="cjcTemp" value="25" oninput="calcSanitizeInput(this);calcOnCjcChange()" placeholder="25" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+            </div>
+        </div>
+        <div id="leadOhmBox" style="display:none;margin:8px 0">
+            <div class="calc-row">
+                <div class="calc-col">
+                    <label class="calc-label">Lead Resistance (Ω)</label>
+                    <input type="text" id="leadOhm" value="0" oninput="calcSanitizeInput(this);calcOnCjcChange()" placeholder="0" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
                 </div>
             </div>
         </div>
@@ -209,7 +224,7 @@
             <div id="calibSensorMode" style="display:none;">
                 <div class="calc-row" style="margin-top:6px;margin-bottom:0;">
                     <div class="calc-col">
-                        <label class="calc-label">Sensor (mV)</label>
+                        <label class="calc-label" id="calibSensorInputLabel">Sensor (mV)</label>
                         <input type="text" id="calibSensorMv" placeholder="mV..." oninput="calcSanitizeInput(this);calcMvToTarget()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
                     </div>
                     <div class="calc-col">
@@ -341,7 +356,7 @@
                 <div class="calc-row">
                     <div class="calc-col">
                         <label class="calc-label">Total Point</label>
-                        <select id="customPointCount" onchange="calcBuildCustomInputs()" class="calc-select" style="font-size:11px;">
+                        <select id="customPointCount" onchange="calcBuildCustomInputs();calcApplyCustomPoints(true);calcSaveStateDebounced()" class="calc-select" style="font-size:11px;">
                             <option value="0" selected>0 Points</option>
                             <option value="2">2 Points</option>
                             <option value="3">3 Points</option>
@@ -448,18 +463,20 @@
         <div class="log-section-title">CONFIGURATION</div>
         <select id="log-vMode" autocomplete="off" onchange="logChgMode()" class="log-select" style="margin-bottom:10px; border-left:4px solid var(--gold);">
             <option value="ma">TRANSMITTER (4-20 mA)</option>
+            <option value="dp-flow">DP FLOW √ΔP (4-20 mA)</option>
             <option value="pt">RTD PT100 (CVD IEC 60751)</option>
             <option value="tk">TC TYPE K (NIST ITS-90)</option>
             <option value="ts">TC TYPE S (NIST ITS-90)</option>
+            <option value="tj">TC TYPE J (NIST ITS-90)</option>
         </select>
         <div class="log-row">
             <div class="log-col">
                 <label class="log-label">LRV</label>
-                <input type="number" inputmode="decimal" id="log-lrv" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input">
+                <input type="number" inputmode="decimal" id="log-lrv" autocomplete="off" oninput="logUpd();logDrawChart();logSaveSettings()" class="log-input">
             </div>
             <div class="log-col">
                 <label class="log-label">URV</label>
-                <input type="number" inputmode="decimal" id="log-urv" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input">
+                <input type="number" inputmode="decimal" id="log-urv" autocomplete="off" oninput="logUpd();logDrawChart();logSaveSettings()" class="log-input">
             </div>
             <div class="log-col">
                 <label class="log-label">UNIT</label>
@@ -469,10 +486,16 @@
         <div class="log-row" id="log-cjRow" style="display:none;">
             <div class="log-col">
                 <label class="log-label" style="color:var(--orange);">COLD JUNCTION °C</label>
-                <input type="number" inputmode="decimal" id="log-coldJunction" value="" step="0.1" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input" style="border:1px solid var(--orange);" placeholder="0.0">
+                <input type="number" inputmode="decimal" id="log-coldJunction" value="" step="0.1" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input" style="border:1px solid var(--orange);" placeholder="25.0">
             </div>
         </div>
-        <div id="log-validationMsg" class="log-validation-msg">URV must be greater than LRV</div>
+        <div class="log-row" id="log-leadRow" style="display:none;">
+            <div class="log-col">
+                <label class="log-label" style="color:var(--blue);">LEAD RESISTANCE (Ω)</label>
+                <input type="number" inputmode="decimal" id="log-leadOhm" value="0" step="0.01" autocomplete="off" oninput="logUpd();logSaveSettings()" class="log-input" style="border:1px solid var(--blue);" placeholder="0.0">
+            </div>
+        </div>
+        <div id="log-validationMsg" class="log-validation-msg">LRV & URV required and URV must be greater than LRV</div>
 
         <div class="log-section-title">TOLERANCE</div>
         <div class="log-tol-selector-row">
@@ -482,7 +505,7 @@
         <div class="log-tol-input-row" id="log-tolInputRow" style="display:none;">
             <div class="log-tol-input-col">
                 <label class="log-label">TOLERANCE VALUE</label>
-                <input type="number" inputmode="decimal" id="log-tolValue" value="" step="any" autocomplete="off" oninput="logRebuildTable();logSaveSettings()" class="log-input" placeholder="0.00">
+                <input type="number" inputmode="decimal" id="log-tolValue" value="" step="any" autocomplete="off" oninput="logRebuildTable();logDrawChart();logSaveSettings()" class="log-input" placeholder="0.00">
             </div>
             <div class="log-tol-input-col">
                 <label class="log-label">UNIT (AUTO)</label>
@@ -510,6 +533,7 @@
             <input type="number" inputmode="decimal" id="log-maMeasured" placeholder="0.000" step="0.001" autocomplete="off" class="log-input" style="border:2px solid var(--blue);" oninput="logConvLive()">
             <div id="log-convOut" style="text-align:center; color:var(--green); font-size:12px; margin-top:5px; font-weight:bold;"></div>
             <div id="log-clampMsg" class="log-clamp-msg"></div>
+            <div id="log-measWarn" class="log-validation-msg" style="color:var(--orange);"></div>
             <button class="log-btn-add" onclick="logAddLog()">SAVE DATA POINT</button>
             <button class="log-btn-auto" id="log-btnAuto" onclick="logAutoStep()">AUTO STEP (0%–100%)</button>
         </div>
@@ -550,6 +574,7 @@
             <table class="log-table" id="log-mainTable">
                 <thead>
                     <tr>
+                        <th class="log-th">STATE</th>
                         <th class="log-th">DIR</th>
                         <th class="log-th" id="log-th-in">INPUT</th>
                         <th class="log-th" id="log-th-meas">MEAS</th>
@@ -563,6 +588,7 @@
                 <tbody id="log-logBody"></tbody>
             </table>
         </div>
+        <div id="log-liveMetrics" class="log-metrics-bar" style="display:none;"></div>
         <div id="log-print-summary">
             <div style="font-size:9px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">CALIBRATION SUMMARY</div>
             <div style="font-size:13px; font-weight:900;" id="log-p-summary-result"></div>
@@ -570,8 +596,8 @@
         </div>
         <div id="log-print-footer">Support by : E&I Cal.Team<sup style="font-size:7px;">TM</sup></div>
         <button class="log-btn-print log-no-print" onclick="logSavePdf()">EXPORT TO PDF</button>
-        <button class="log-btn-clear log-no-print" onclick="logClearLogs()">RESET LOG ONLY</button>
-        <button class="log-btn-reset-all log-no-print" onclick="logResetAll()">RESET ALL SETTINGS</button>
+        <button class="log-btn-clear log-no-print" id="log-btnClear" onclick="logClearLogs()">RESET LOG ONLY</button>
+        <button class="log-btn-reset-all log-no-print" id="log-btnResetAll" onclick="logResetAll()">RESET ALL SETTINGS</button>
     </div>
 </div>
 
@@ -609,38 +635,25 @@
             <div class="spec-item">NAMUR NE43 (Fault Detection)</div>
             <div class="spec-item">IEC 60381-1 (Analog Signal Standard)</div>
             <div class="spec-formula">Linear: PV = LRV + (mA-4)/16 × (URV-LRV)</div>
-            <div class="spec-formula">Reverse: PV = URV - (mA-4)/16 × (URV-LRV)</div>
+            <div class="spec-formula">Reverse: PV = LRV + (20-mA)/16 × (URV-LRV)</div>
             <div class="spec-section">RTD PT100 (IEC 60751)</div>
-            <div class="spec-item">ITS-90 Callendar-Van Dusen Equation</div>
-            <div class="spec-formula">T ≥ 0°C: R = R₀(1 + AT + BT²)</div>
-            <div class="spec-formula">T &lt; 0°C: R = R₀(1 + AT + BT² + C(T-100)T³)</div>
+            <div class="spec-item">ITS-90 Callendar-Van Dusen Equation + Lead R</div>
+            <div class="spec-formula">T ≥ 0°C: R = R₀(1 + AT + BT²) + R_lead</div>
+            <div class="spec-formula">T &lt; 0°C: R = R₀(1 + AT + BT² + C(T-100)T³) + R_lead</div>
             <div class="spec-item-sub">A = 3.9083×10⁻³, B = -5.775×10⁻⁷, C = -4.183×10⁻¹²</div>
-            <div class="spec-item-sub">Newton-Raphson Iteration (50 cycles)</div>
+            <div class="spec-item-sub">R ≥ 100Ω: Quadratic; R &lt; 100Ω: Newton-Raphson (50 cycles)</div>
             <div class="spec-item-sub">Range: -200°C to +850°C</div>
-            <div class="spec-section">TC Type K (NIST ITS-90)</div>
-            <div class="spec-item">NiCr-NiAl (Chromel-Alumel)</div>
-            <div class="spec-item-sub">T ≤ 0°C: 10th-order Polynomial</div>
-            <div class="spec-item-sub">T > 0°C: 9th-order + Exponential Term</div>
-            <div class="spec-item">Cold Junction Compensation (CJC)</div>
-            <div class="spec-item-sub">Inverse: 8th / 9th / 8th-order Polynomial</div>
-            <div class="spec-item-sub">4-cycle Derivative Refinement</div>
-            <div class="spec-item-sub">Range: -270°C to +1372°C</div>
-            <div class="spec-section">TC Type S (NIST ITS-90)</div>
-            <div class="spec-item">Pt10%Rh-Pt (Platinum Rhodium)</div>
-            <div class="spec-item-sub">T ≤ 1064.18°C: 8th-order Polynomial</div>
-            <div class="spec-item-sub">T > 1064.18°C: 4th-order Polynomial</div>
-            <div class="spec-item-sub">Binary Search + Derivative Refinement</div>
-            <div class="spec-item-sub">Range: -50°C to +1768°C</div>
-            <div class="spec-section">Flow Compensation (ISO 5167 / AGA-3)</div>
+            <div class="spec-section">TC Type K / S / J (NIST ITS-90)</div>
+            <div class="spec-item">Type K (-270 to +1372°C) · Type S (-50 to +1768°C) · Type J (-210 to +1200°C)</div>
+            <div class="spec-item">Cold Junction Compensation (CJC) on all TC types</div>
+            <div class="spec-formula">V_meas = E(T_hot) - E(T_cjc)</div>
+            <div class="spec-section">Flow Compensation (ISO 5167 / AGA-3 / API MPMS)</div>
             <div class="spec-item">ISO 5167-1 (Orifice, Venturi, Nozzle)</div>
-            <div class="spec-item">AGA-3 (Gas Flow Measurement)</div>
-            <div class="spec-item">API MPMS (Thermal Expansion - Liquid)</div>
-            <div class="spec-formula">DP Flow: Q ∝ √(ΔP)</div>
-            <div class="spec-formula">Thermal: Q_act = Q_meas × √(T_d/T_a)</div>
-            <div class="spec-formula">Gas: Q = Q_meas × √(T_d/T_a) × √(P_a/P_d)</div>
-            <div class="spec-item-sub">P_abs = P_gauge + 1.01325 bar</div>
-            <div class="spec-item-sub">T_abs = T_celsius + 273.15 K</div>
-            <div class="spec-item-sub">Flow Fix Calc: Q_final = Q × (FF/100)</div>
+            <div class="spec-item">AGA-3 (Gas Flow) &amp; API MPMS (Liquid Thermal Expansion)</div>
+            <div class="spec-formula">Base Flow: Q = LRV + √(DP%) × (URV - LRV)</div>
+            <div class="spec-formula">Oil Thermal: Q_act = Q × √(1 / (1 + β·(T_a - T_d)))</div>
+            <div class="spec-formula">Gas/Steam: Q = Q × √((T_d+273.15)/(T_a+273.15)) × √((P_a+1.01325)/(P_d+1.01325))</div>
+            <div class="spec-formula">Flow Fix (ON): Q_final = Q_comp × (FF/100)</div>
             <div class="spec-section">Damping Simulation</div>
             <div class="spec-item">First-order Low Pass Filter</div>
             <div class="spec-formula">α = 1 - e^(-Δt/τ)</div>
@@ -652,7 +665,6 @@
             <div class="spec-item">Mitsubishi FX: 0-4000 (12-bit)</div>
             <div class="spec-item">AB Raw: 3277-16383 (Scaled)</div>
             <div class="spec-formula">Reg = Round(Pct × MaxRaw)</div>
-            <div class="spec-item-sub">Simulation only — not for actual PLC control</div>
             <div class="spec-section">ADC/DAC Type (Education)</div>
             <div class="spec-item">ADC: Sigma-Delta 24-bit (Sensor Input)</div>
             <div class="spec-item">DAC: 16-bit (4-20 mA Output)</div>
@@ -668,6 +680,7 @@
     </div>
 </div>
 
+<script type="module" src="/src/pdfBridge.ts"></script>
 <script src="./script.js"></script>
 </body>
 </html>
