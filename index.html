@@ -279,26 +279,46 @@
         </div>
         <div id="rangeError" class="calc-error-msg">LRV must be less than URV!</div>
         
-        <!-- ADC/DAC INFO - Compact -->
-        <div id="adcDacInfoBox" style="display:none;margin-top:8px;background:var(--card);border:1px solid #1a332a;border-radius:12px;padding:10px;text-align:center;">
-            <div style="display:flex;gap:8px;">
-                <div style="flex:1;text-align:center;">
-                    <div style="font-size:8.5px;color:var(--green);letter-spacing:0.8px;font-weight:700;">ADC 24-BIT</div>
-                    <div style="font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--green);font-weight:700;margin:2px 0;" id="adcValueDisplay">---</div>
-                    <div style="font-size:8px;color:var(--text3);">0–16.7M</div>
+        <!-- ADC -> MCU (HART) -> DAC -> LOOP OUT -->
+        <div id="adcDacInfoBox" style="display:none;margin-top:8px;background:var(--card);border:1px solid #1a332a;border-radius:12px;padding:10px 6px 8px;text-align:center;">
+            <div style="display:flex;align-items:center;gap:4px;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:8px;color:var(--green);font-weight:700;">ADC 24B</div>
+                    <div style="font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:11px;color:var(--green);font-weight:700;margin:2px 0;" id="adcValueDisplay">---</div>
+                    <div style="font-size:7.5px;color:var(--text3);">0–16.7M</div>
                 </div>
-                <div style="width:1px;background:var(--border2);"></div>
-                <div style="flex:1;text-align:center;">
-                    <div style="font-size:8.5px;color:var(--blue);letter-spacing:0.8px;font-weight:700;">DAC 16-BIT</div>
-                    <div style="font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--blue);font-weight:700;margin:2px 0;" id="dacValueDisplay">---</div>
-                    <div style="font-size:8px;color:var(--text3);">0–65K</div>
+                <span style="color:var(--text3);font-size:11px;flex-shrink:0;">→</span>
+                <div style="flex:1.15;min-width:0;">
+                    <div style="display:inline-flex;align-items:center;justify-content:center;gap:3px;font-size:8px;color:var(--orange);font-weight:700;">
+                        <span>MCU</span>
+                        <span style="display:inline-flex;align-items:center;gap:2px;padding:1px 4px;border-radius:4px;border:1px solid rgba(0,212,255,0.45);background:rgba(0,212,255,0.08);color:var(--blue);font-size:6.8px;font-weight:800;letter-spacing:0.4px;" title="HART FSK Bell 202">
+                            <svg width="10" height="8" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 5c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 5 0"/>
+                            </svg>
+                            HART
+                        </span>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:11px;color:var(--orange);font-weight:700;margin:2px 0;" id="mcuValueDisplay">---</div>
+                    <div style="font-size:7.5px;color:var(--text3);" id="mcuSubDisplay">Linear+Scale</div>
                 </div>
-                <div style="width:1px;background:var(--border2);"></div>
-                <div style="flex:1;text-align:center;">
-                    <div style="font-size:8.5px;color:var(--gold);letter-spacing:0.8px;font-weight:700;">DAC OUT</div>
-                    <div style="font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--gold);font-weight:700;margin:2px 0;" id="dacMaDisplay">---</div>
-                    <div style="font-size:8px;color:var(--text3);">4–20 mA</div>
+                <span style="color:var(--text3);font-size:11px;flex-shrink:0;">→</span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:8px;color:var(--blue);font-weight:700;">DAC 16B</div>
+                    <div style="font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:11px;color:var(--blue);font-weight:700;margin:2px 0;" id="dacValueDisplay">---</div>
+                    <div style="font-size:7.5px;color:var(--text3);">0–65K</div>
                 </div>
+                <span style="color:var(--text3);font-size:11px;flex-shrink:0;">→</span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:8px;color:var(--gold);font-weight:700;">LOOP OUT</div>
+                    <div style="font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:11px;color:var(--gold);font-weight:700;margin:2px 0;" id="dacMaDisplay">---</div>
+                    <div style="font-size:7.5px;color:var(--text3);">4–20 mA</div>
+                </div>
+            </div>
+            <div style="margin-top:7px;padding-top:6px;border-top:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:8.5px;color:var(--blue);">
+                <svg width="12" height="9" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <path d="M1 5c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 5 0"/>
+                </svg>
+                <span id="hartInfoLine">HART FSK (1200/2200 Hz) ← MCU → Loop</span>
             </div>
         </div>
 

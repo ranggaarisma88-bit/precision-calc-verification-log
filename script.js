@@ -1,7 +1,7 @@
 /* ==================== THEME SYSTEM ==================== */
 function setTheme(themeName) {
     vibrate(15);
-    localStorage.setItem('app_theme', themeName);
+    try { localStorage.setItem('app_theme', themeName); } catch(e) {}
     document.documentElement.setAttribute('data-theme', themeName);
 
     const metaTheme = document.querySelector('meta[name="theme-color"]');
@@ -44,7 +44,8 @@ function toggleThemeMenu() {
 }
 
 function loadTheme() {
-    const saved = localStorage.getItem('app_theme') || 'industrial';
+    let saved = 'industrial';
+    try { saved = localStorage.getItem('app_theme') || 'industrial'; } catch(e) {}
     document.documentElement.setAttribute('data-theme', saved);
 
     document.querySelectorAll('.theme-option').forEach(btn => {
@@ -243,7 +244,6 @@ function calcTcS_TtoV(T){
         CALC_TC_S_LOW.reduce((s,c,i)=>s+c*Math.pow(T,i),0):
         CALC_TC_S_HIGH.reduce((s,c,i)=>s+c*Math.pow(T-1064.18,i),0);
 }
-/* FIX: Hapus `if(mV<=0)return 0;` agar suhu negatif TC Type S (-50°C = -0.236 mV) akurat */
 function calcTcS_VtoT(mV){
     mV=calcClamp(mV,-0.236,18.693);
     let T=mV<=0?-10:600;
@@ -282,10 +282,6 @@ function calcTcJ_VtoT(mV){
     }
     return calcClamp(T,-210,1200);
 }
-
-/* FIX: PT100 R->T hanya pakai rumus kuadratik saat R >= 100 Ohm (T >= 0°C).
-   Di bawah 0°C (R < 100 Ohm) pakai Newton-Raphson Callendar-Van Dusen penuh (dengan koefisien C),
-   serta mendukung kompensasi Lead Resistance (Ohm). */
 function calcPT100_RtoT(measuredR, leadOhm){
     const lead=isFinite(leadOhm)?leadOhm:0;
     const R=measuredR-lead;
@@ -435,7 +431,8 @@ function calcSaveStateDebounced(){
     calcSaveTimer=setTimeout(calcSaveState,300);
 }
 function calcLoadState(){
-    const saved=localStorage.getItem('calc_state');
+    let saved=null;
+    try{saved=localStorage.getItem('calc_state');}catch(e){return false;}
     if(!saved)return false;
     try{
         const data=JSON.parse(saved);
@@ -549,8 +546,6 @@ function calcClearPctButtons(){
     document.querySelectorAll('#tab-calc .calc-btn-pct').forEach(b=>b.classList.remove('active'));
 }
 
-/* FIX: Damping loop hanya berjalan saat nilai sedang konvergen & berhenti otomatis saat settled,
-   sehingga tidak menahan calcSaveStateDebounced() selamanya */
 function calcStartDampingLoop(){
     calcStopDampingLoop();
     const sm=calc$('sm').value;
@@ -696,7 +691,6 @@ function calcTglS(){
         updateADCDisplay(NaN,NaN);
         updateSensorRangeDisplay('');
     }else{
-        // FIX: Tampilkan CJC untuk semua thermocouple (tk, ts, tj) & Lead Resistance untuk PT100
         calc$('cjcBox').style.display=(mode==='tk'||mode==='ts'||mode==='tj')?'block':'none';
         if(calc$('leadOhmBox'))calc$('leadOhmBox').style.display=(mode==='pt')?'block':'none';
         calcEl.actualPVbox.style.display='none';
@@ -706,7 +700,6 @@ function calcTglS(){
         if(adcDacBox)adcDacBox.style.display='block';
         calcUpdateCalibUnitLabel();
 
-        // FIX: Aktifkan mode SENSOR untuk PT100 (Ω -> °C) maupun TC (mV -> °C)
         if(calibModeSensorBtn){
             calibModeSensorBtn.style.display='block';
             calibModeSensorBtn.textContent=(mode==='pt')?'SENSOR Ω':'SENSOR mV';
@@ -797,9 +790,11 @@ function updateSensorRangeDisplay(mode) {
     if (el2) el2.innerText = text;
 }
 
-/* ============ ADC/DAC DISPLAY ============ */
+/* ============ ADC -> MCU -> DAC -> LOOP OUT DISPLAY ============ */
 function updateADCDisplay(rawValue, targetValue) {
     const adcEl = document.getElementById('adcValueDisplay');
+    const mcuEl = document.getElementById('mcuValueDisplay');
+    const mcuSubEl = document.getElementById('mcuSubDisplay');
     const dacEl = document.getElementById('dacValueDisplay');
     const dacMaEl = document.getElementById('dacMaDisplay');
 
@@ -809,6 +804,8 @@ function updateADCDisplay(rawValue, targetValue) {
 
     if (isNaN(rawValue) || !mode || mode === 'ma' || mode === 'ma-rev' || isNaN(targetValue)) {
         adcEl.innerText = '---';
+        if (mcuEl) mcuEl.innerText = '---';
+        if (mcuSubEl) mcuSubEl.innerText = 'Linear+Scale';
         dacEl.innerText = '---';
         dacMaEl.innerText = '---';
         return;
@@ -819,18 +816,22 @@ function updateADCDisplay(rawValue, targetValue) {
     const adcValue = Math.round(pct * 16777215);
 
     adcEl.innerText = adcValue.toLocaleString();
+    if (mcuSubEl) mcuSubEl.innerText = targetValue.toFixed(1) + ' °C';
 
     const lrv = calcToNum(calc$('lrv').value);
     const urv = calcToNum(calc$('urv').value);
     if (!isNaN(lrv) && !isNaN(urv) && urv > lrv) {
         const fmMode = calc$('fm').value;
         const dacMa = calcInvertPVtoMA(targetValue, lrv, urv, fmMode);
+        const spanPct = ((dacMa - CALC_MA_MIN) / CALC_MA_SPAN) * 100;
         const dacPctClamped = Math.max(0, Math.min(1, (dacMa - CALC_MA_MIN) / CALC_MA_SPAN));
         const dacValue = Math.round(dacPctClamped * 65535);
 
-        dacEl.innerText = dacValue.toLocaleString();
-        dacMaEl.innerText = (isNaN(dacMa) ? '---' : dacMa.toFixed(3) + ' mA');
+        if (mcuEl) mcuEl.innerText = isNaN(spanPct) ? '---' : spanPct.toFixed(1) + '%';
+        dacEl.innerText = isNaN(dacValue) ? '---' : dacValue.toLocaleString();
+        dacMaEl.innerText = isNaN(dacMa) ? '---' : dacMa.toFixed(3) + ' mA';
     } else {
+        if (mcuEl) mcuEl.innerText = '---';
         dacEl.innerText = '---';
         dacMaEl.innerText = 'Set range';
     }
@@ -1015,7 +1016,6 @@ function calcGetFlowCompensation(fmMode){
         }
     }
 
-    // FIX: Flow Fix Mode (ON/OFF) benar-benar dicek dan mengalikan (FF / 100)
     if((fmMode==='dp'||fmMode==='ol'||fmMode==='gs')&&calc$('ffm').value==='on'){
         const ffcVal=calcToNum(calc$('ffc').value);
         const ff=(!isNaN(ffcVal)&&ffcVal>0)?ffcVal:100;
@@ -1122,7 +1122,6 @@ function calcActualToMA(){
 function calcTglF(){
     vibrate(15);
     const m=calc$('fm').value;
-    // FIX: Tampilkan #ca untuk semua mode Flow (termasuk DP NO COMP) agar #dpRangeBlock bisa diakses!
     const isFlow=(m==='dp'||m==='ol'||m==='gs');
     calc$('ca').style.display=isFlow?'block':'none';
     calc$('dpRangeBlock').style.display=isFlow?'block':'none';
@@ -1401,7 +1400,7 @@ function calcBuildCustomInputs(){
     const count=parseInt(document.getElementById('customPointCount').value,10)||0;
     const container=document.getElementById('customInputsContainer');
     if(count===0){
-        container.innerHTML='<div style="text-align:center;color:var(--text3);font-size:9px;padding:10px;">Select total points</div>';
+        container.innerHTML='<div style="text-align:center;color:var(--text3);font-size:10px;padding:10px;">Select total points</div>';
         const rt=document.getElementById('customResultTable');
         if(rt)rt.style.display='none';
         return;
@@ -1410,7 +1409,7 @@ function calcBuildCustomInputs(){
     let html='';
     for(let i=1;i<=count;i++){
         const val=document.getElementById('customVal'+i)?.value||'';
-        html+=`<div class="custom-entry-row"><span style="font-size:8px;color:var(--text3);min-width:44px;">Point ${i}</span><input type="text" id="customVal${i}" class="custom-entry-input" placeholder="0.00" value="${val}" oninput="calcSanitizeInput(this);calcSaveStateDebounced()" lang="en" inputmode="decimal"><span class="custom-entry-unit" style="font-size:8px;color:var(--text3);min-width:20px;">${unit}</span></div>`;
+        html+=`<div class="custom-entry-row"><span style="font-size:10px;color:var(--text3);min-width:48px;">Point ${i}</span><input type="text" id="customVal${i}" class="custom-entry-input" placeholder="0.00" value="${val}" oninput="calcSanitizeInput(this);calcSaveStateDebounced()" lang="en" inputmode="decimal"><span class="custom-entry-unit" style="font-size:10px;color:var(--text3);min-width:24px;">${unit}</span></div>`;
     }
     container.innerHTML=html;
 }
@@ -1547,7 +1546,7 @@ function calcClr(){
     if(cr)cr.innerText='0.00';
     if(cu)cu.innerText='kPa';
     if(cb)cb.classList.remove('active');
-    localStorage.removeItem('calc_state');
+    try{localStorage.removeItem('calc_state');}catch(e){}
     calcScheduleUpdate();
     showToast('Calculator data cleared');
 }
@@ -1789,7 +1788,6 @@ function logComputeSummaryMetrics(){
     const tolPct=logTolToPct();
     const maxAbsErr=logData.reduce((m,d)=>Math.max(m,Math.abs(parseFloat(d.err)||0)),0);
 
-    // Hysteresis: max |err_up - err_down| on matching reference points within same state
     let maxHyst=0,hasHyst=false;
     const ups=logData.filter(d=>d.dir==='▲');
     const downs=logData.filter(d=>d.dir==='▼');
@@ -1831,13 +1829,12 @@ function logUpdateLiveMetrics(){
     const afTxt=m.afEval?`${m.afEval.pass}/${m.afEval.total}`:'—';
     const alTxt=m.alEval?`${m.alEval.pass}/${m.alEval.total}`:'—';
     box.innerHTML=
-        `<div><div style="font-size:7px;color:var(--text3);">MAX ERR</div><div style="font-weight:bold;">${m.maxAbsErr.toFixed(3)}%</div></div>`+
-        `<div><div style="font-size:7px;color:var(--text3);">HYSTERESIS</div><div style="font-weight:bold;color:var(--blue);">${m.hasHyst?m.maxHyst.toFixed(3)+'%':'N/A'}</div></div>`+
-        `<div><div style="font-size:7px;color:var(--text3);">AS FOUND</div><div style="font-weight:bold;color:${!m.afEval?'var(--text3)':m.afEval.allPass?'var(--green)':'var(--red)'};">${afTxt}</div></div>`+
-        `<div><div style="font-size:7px;color:var(--text3);">AS LEFT</div><div style="font-weight:bold;color:${!m.alEval?'var(--text3)':m.alEval.allPass?'var(--green)':'var(--red)'};">${alTxt}</div></div>`;
+        `<div><div style="font-size:8.5px;color:var(--text3);">MAX ERR</div><div style="font-weight:bold;">${m.maxAbsErr.toFixed(3)}%</div></div>`+
+        `<div><div style="font-size:8.5px;color:var(--text3);">HYSTERESIS</div><div style="font-weight:bold;color:var(--blue);">${m.hasHyst?m.maxHyst.toFixed(3)+'%':'N/A'}</div></div>`+
+        `<div><div style="font-size:8.5px;color:var(--text3);">AS FOUND</div><div style="font-weight:bold;color:${!m.afEval?'var(--text3)':m.afEval.allPass?'var(--green)':'var(--red)'};">${afTxt}</div></div>`+
+        `<div><div style="font-size:8.5px;color:var(--text3);">AS LEFT</div><div style="font-weight:bold;color:${!m.alEval?'var(--text3)':m.alEval.allPass?'var(--green)':'var(--red)'};">${alTxt}</div></div>`;
 }
 
-/* FIX: Wajibkan kedua LRV & URV terisi valid dan URV > LRV */
 function logValidateRange(){
     const lrv=parseFloat(log$('log-lrv').value),
           urv=parseFloat(log$('log-urv').value);
@@ -2027,7 +2024,6 @@ function logResetAutoBtn(){
 function logAutoStep(){
     vibrate(20);
     if(logAutoStepActive){
-        // Klik lagi saat berjalan = Cancel Auto Step cleanly!
         logAutoStepActive=false;
         logAutoStepIdx=-1;
         log$('log-actIn').value='';
@@ -2082,10 +2078,6 @@ function logDrawChart(){
     if(logChartRaf)cancelAnimationFrame(logChartRaf);
     logChartRaf=requestAnimationFrame(log_drawChart);
 }
-/* FIX:
-   1) Resolve CSS variables via getComputedStyle (Canvas 2D tidak mendukung 'var(--...)')
-   2) Samakan skala Y-axis untuk titik error & garis toleransi (sebelumnya meleset 2x lipat!)
-   3) Gambar kurva Upscale & Downscale dan gunakan rentang LRV..URV di sumbu X */
 function log_drawChart(){
     logChartRaf=null;
     const cvs=log$('log-errorChart');
@@ -2094,7 +2086,7 @@ function log_drawChart(){
     const container=cvs.parentElement;
     const w=cvs.width=Math.max(280,(container.offsetWidth||360)-24);
     const h=cvs.height=Math.max(165,Math.round(w*0.42));
-    const mrg={top:16,right:15,bottom:28,left:42},
+    const mrg={top:16,right:15,bottom:28,left:44},
           pw=w-mrg.left-mrg.right,
           ph=h-mrg.top-mrg.bottom;
     const isPrint=window._printing===true;
@@ -2103,7 +2095,7 @@ function log_drawChart(){
     const colBg=isPrint?'#ffffff':(cs.getPropertyValue('--card').trim()||'#1a1a1a');
     const colBorder=isPrint?'#000000':(cs.getPropertyValue('--border2').trim()||'#333333');
     const colGrid=isPrint?'#dddddd':(cs.getPropertyValue('--border2').trim()||'#333333');
-    const colText=isPrint?'#333333':(cs.getPropertyValue('--text3').trim()||'#888888');
+    const colText=isPrint?'#333333':(cs.getPropertyValue('--text3').trim()||'#9a9a9a');
 
     ctx.clearRect(0,0,w,h);
     ctx.fillStyle=colBg;
@@ -2119,7 +2111,7 @@ function log_drawChart(){
     const yHalfMax=maxNeeded<=2.5?2.5:maxNeeded<=5?5:maxNeeded<=10?10:Math.ceil(maxNeeded/5)*5;
     const yToPx=(errPct)=>midY-(errPct/yHalfMax)*(ph/2);
 
-    ctx.font='bold 8px sans-serif';
+    ctx.font='600 9px sans-serif';
     ctx.textAlign='right';
     [-yHalfMax,-yHalfMax/2,0,yHalfMax/2,yHalfMax].forEach(v=>{
         const y=yToPx(v);
@@ -2131,7 +2123,7 @@ function log_drawChart(){
         ctx.stroke();
 
         ctx.fillStyle=colText;
-        ctx.fillText((v>0?'+':'')+Number(v.toFixed(2))+'%',mrg.left-4,y+3);
+        ctx.fillText((v>0?'+':'')+Number(v.toFixed(2))+'%',mrg.left-5,y+3);
     });
 
     if(tolPct!==null&&tolPct>0){
@@ -2158,9 +2150,9 @@ function log_drawChart(){
 
     if(logData.length===0){
         ctx.fillStyle=colText;
-        ctx.font='10px sans-serif';
+        ctx.font='600 11px sans-serif';
         ctx.textAlign='center';
-        ctx.fillText('No data points recorded',mrg.left+pw/2,midY-8);
+        ctx.fillText('No data points recorded',mrg.left+pw/2,midY-10);
         return;
     }
 
@@ -2174,11 +2166,11 @@ function log_drawChart(){
     const xToPx=(actVal)=>xSpan>0?mrg.left+((actVal-xMin)/xSpan)*pw:mrg.left+pw/2;
 
     ctx.fillStyle=colText;
-    ctx.font='bold 7px sans-serif';
+    ctx.font='600 8.5px sans-serif';
     ctx.textAlign='center';
     [0,0.25,0.5,0.75,1].forEach(frac=>{
         const ref=xMin+xSpan*frac;
-        ctx.fillText(ref.toFixed(1),mrg.left+pw*frac,h-6);
+        ctx.fillText(ref.toFixed(1),mrg.left+pw*frac,h-7);
     });
 
     const drawSeries=(dirChar,color)=>{
@@ -2274,7 +2266,6 @@ function logSavePdf(){
     }
     logSaveSettings();
 
-    // Render chart on clean white print palette for crisp PDF capture
     window._printing=true;
     log_drawChart();
     let chartDataUrl='';
@@ -2329,7 +2320,6 @@ function logSavePdf(){
         }catch(e){}
     }
 
-    // Fallback ke print browser bila PDF bridge belum tersedia
     window._printing=true;
     log_drawChart();
     setTimeout(()=>{window.print();},100);
