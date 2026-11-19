@@ -72,6 +72,7 @@
 
     <!-- TAB CALC -->
     <div class="tab-content active" id="tab-calc">
+        <!-- 1. FINAL PROCESS VALUE -->
         <div class="calc-section-title">Final Process Value</div>
         <div class="calc-res-box" id="resBox">
             <div style="font-size:28px;font-weight:800;">
@@ -113,80 +114,7 @@
             </div>
         </div>
 
-        <div class="calc-section-title">Flow Compensation</div>
-        <select id="fm" onchange="calcTglF()" class="calc-select">
-            <option value="ln">LINEAR</option>
-            <option value="dp">DP NO COMP</option>
-            <option value="ol">OIL THERMAL</option>
-            <option value="gs">GAS/STEAM</option>
-        </select>
-        <div id="ca" class="calc-comp-box">
-            <div id="dpRangeBlock" style="display:none;">
-                <div class="calc-row">
-                    <div class="calc-col">
-                        <label class="calc-label">DP LRV</label>
-                        <input type="text" id="dpLrv" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                    </div>
-                    <div class="calc-col">
-                        <label class="calc-label">DP URV</label>
-                        <input type="text" id="dpUrv" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="100" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                    </div>
-                    <div class="calc-col">
-                        <label class="calc-label">DP Unit</label>
-                        <input type="text" id="dpUnit" placeholder="mbar" maxlength="8" oninput="calcOnParamChange()" class="calc-input">
-                    </div>
-                </div>
-                <div class="calc-row">
-                    <div class="calc-col">
-                        <label class="calc-label">DP Info</label>
-                        <select id="dpShowMode" onchange="calcOnParamChange()" class="calc-select">
-                            <option value="off">OFF</option>
-                            <option value="on">ON</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div id="tempCompRow" class="calc-row" style="display:none;">
-                <div class="calc-col">
-                    <label class="calc-label">Design T (°C)</label>
-                    <input type="text" id="td" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="Design" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                </div>
-                <div class="calc-col">
-                    <label class="calc-label">Actual T (°C)</label>
-                    <input type="text" id="ta" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="Actual" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                </div>
-            </div>
-            <div id="oilBetaRow" class="calc-row" style="display:none;">
-                <div class="calc-col">
-                    <label class="calc-label">Thermal Exp β (/°C)</label>
-                    <input type="text" id="oilBeta" value="0.00085" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0.00085" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                </div>
-            </div>
-            <div id="go" class="calc-row" style="display:none">
-                <div class="calc-col">
-                    <label class="calc-label">Design P (bar·g)</label>
-                    <input type="text" id="pd" placeholder="bar(g)" oninput="calcSanitizeInput(this);calcOnParamChange()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                </div>
-                <div class="calc-col">
-                    <label class="calc-label">Actual P (bar·g)</label>
-                    <input type="text" id="pa" placeholder="bar(g)" oninput="calcSanitizeInput(this);calcOnParamChange()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                </div>
-            </div>
-            <div id="ff" class="calc-row" style="display:none">
-                <div class="calc-col">
-                    <label class="calc-label">Flow Fix (%)</label>
-                    <input type="text" id="ffc" placeholder="100" oninput="calcSanitizeInput(this);calcOnParamChange()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
-                </div>
-                <div class="calc-col">
-                    <label class="calc-label">Flow Fix Mode</label>
-                    <select id="ffm" onchange="calcOnParamChange()" class="calc-select">
-                        <option value="off">OFF</option>
-                        <option value="on">ON</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
+        <!-- 2. SENSOR INPUT -->
         <div class="calc-section-title">Sensor Input</div>
         <select id="sm" onchange="calcTglS()" class="calc-select">
             <option value="ma">DIRECT 4-20 mA</option>
@@ -262,6 +190,7 @@
             </div>
         </div>
 
+        <!-- 3. PROCESS TRANSMITTER -->
         <div class="calc-section-title">Process Transmitter</div>
         <div class="calc-row">
             <div class="calc-col">
@@ -322,6 +251,82 @@
             </div>
         </div>
 
+        <!-- 4. FLOW COMPENSATION -->
+        <div class="calc-section-title">Flow Compensation</div>
+        <select id="fm" onchange="calcTglF()" class="calc-select">
+            <option value="ln">LINEAR</option>
+            <option value="dp">DP NO COMP</option>
+            <option value="ol">OIL THERMAL</option>
+            <option value="gs">GAS/STEAM</option>
+        </select>
+        <div id="ca" class="calc-comp-box">
+            <div id="dpRangeBlock" style="display:none;">
+                <div class="calc-row">
+                    <div class="calc-col">
+                        <label class="calc-label">DP LRV</label>
+                        <input type="text" id="dpLrv" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                    </div>
+                    <div class="calc-col">
+                        <label class="calc-label">DP URV</label>
+                        <input type="text" id="dpUrv" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="100" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                    </div>
+                    <div class="calc-col">
+                        <label class="calc-label">DP Unit</label>
+                        <input type="text" id="dpUnit" placeholder="mbar" maxlength="8" oninput="calcOnParamChange()" class="calc-input">
+                    </div>
+                </div>
+                <div class="calc-row">
+                    <div class="calc-col">
+                        <label class="calc-label">DP Info</label>
+                        <select id="dpShowMode" onchange="calcOnParamChange()" class="calc-select">
+                            <option value="off">OFF</option>
+                            <option value="on">ON</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="tempCompRow" class="calc-row" style="display:none;">
+                <div class="calc-col">
+                    <label class="calc-label">Design T (°C)</label>
+                    <input type="text" id="td" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="Design" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+                <div class="calc-col">
+                    <label class="calc-label">Actual T (°C)</label>
+                    <input type="text" id="ta" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="Actual" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+            </div>
+            <div id="oilBetaRow" class="calc-row" style="display:none;">
+                <div class="calc-col">
+                    <label class="calc-label">Thermal Exp β (/°C)</label>
+                    <input type="text" id="oilBeta" value="0.00085" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0.00085" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+            </div>
+            <div id="go" class="calc-row" style="display:none">
+                <div class="calc-col">
+                    <label class="calc-label">Design P (bar·g)</label>
+                    <input type="text" id="pd" placeholder="bar(g)" oninput="calcSanitizeInput(this);calcOnParamChange()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+                <div class="calc-col">
+                    <label class="calc-label">Actual P (bar·g)</label>
+                    <input type="text" id="pa" placeholder="bar(g)" oninput="calcSanitizeInput(this);calcOnParamChange()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+            </div>
+            <div id="ff" class="calc-row" style="display:none">
+                <div class="calc-col">
+                    <label class="calc-label">Flow Fix (%)</label>
+                    <input type="text" id="ffc" placeholder="100" oninput="calcSanitizeInput(this);calcOnParamChange()" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+                <div class="calc-col">
+                    <label class="calc-label">Flow Fix Mode</label>
+                    <select id="ffm" onchange="calcOnParamChange()" class="calc-select">
+                        <option value="off">OFF</option>
+                        <option value="on">ON</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. ANALOG & SIMULATION -->
         <div class="calc-section-title">Analog &amp; Simulation</div>
         <div class="calc-sim-box">
             <div class="calc-sim-row calc-sim-row-top">
@@ -350,36 +355,51 @@
         </div>
         <div class="calc-btn-grid" id="btnGrid"></div>
 
-        <div class="calc-section-title">Damping Simulation</div>
-        <div class="calc-row">
-            <div class="calc-col-2">
-                <label class="calc-label">Time Constant τ (sec)</label>
-                <input type="text" id="damping" value="0" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0 = instant" min="0" max="60" step="0.1" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+        <!-- 6. DAMPING SIMULATION (TOGGLE) -->
+        <div class="calc-section-title">
+            Damping Simulation
+            <label class="calc-toggle-mini calc-toggle-off" id="dampingToggle" onclick="toggleDampingPanel()">
+                <span class="calc-toggle-track-mini"></span>
+                <span style="font-size:9px;color:var(--text3);letter-spacing:0.6px" id="dampingToggleLabel">OFF</span>
+            </label>
+        </div>
+        <div id="dampingContent" style="display:none;">
+            <div class="calc-row">
+                <div class="calc-col">
+                    <label class="calc-label">Time Constant τ (sec)</label>
+                    <input type="text" id="damping" value="0" oninput="calcSanitizeInput(this);calcOnParamChange()" placeholder="0 = instant" min="0" max="60" step="0.1" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
             </div>
-            <div class="calc-col">
-                <label class="calc-label">Mode</label>
-                <select id="dampingMode" onchange="calcResetDamping()" class="calc-select">
-                    <option value="off">OFF</option>
-                    <option value="on">ON</option>
-                </select>
+            <select id="dampingMode" onchange="calcResetDamping()" style="display:none;">
+                <option value="off">OFF</option>
+                <option value="on">ON</option>
+            </select>
+        </div>
+
+        <!-- 7. PLC REGISTER (TOGGLE) -->
+        <div class="calc-section-title">
+            PLC Register
+            <label class="calc-toggle-mini calc-toggle-off" id="plcToggle" onclick="togglePlcPanel()">
+                <span class="calc-toggle-track-mini"></span>
+                <span style="font-size:9px;color:var(--text3);letter-spacing:0.6px" id="plcToggleLabel">OFF</span>
+            </label>
+        </div>
+        <div id="plcContent" style="display:none;">
+            <select id="pb" onchange="onPlcSelectChange()" class="calc-select" style="color:var(--blue);margin-bottom:8px;">
+                <option value="hi">HIDE</option>
+                <option value="27648">SIEMENS S7</option>
+                <option value="32767">ALLEN BRADLEY</option>
+                <option value="4000">MITSUBISHI FX</option>
+                <option value="abraw">AB RAW 3277-16383</option>
+            </select>
+            <div id="pp" class="calc-plc-panel">
+                <div id="pr" class="calc-plc-val">0</div>
+                <div style="font-size:9.5px;color:var(--text3);margin-top:4px;" id="plcRangeDisplay"></div>
+                <label style="font-size:9px;color:var(--text3);letter-spacing:0.8px;display:block;margin-top:2px;">RAW INTEGER REGISTER</label>
             </div>
         </div>
 
-        <div class="calc-section-title">PLC Register</div>
-        <select id="pb" onchange="calcTglP()" class="calc-select" style="color:var(--blue)">
-            <option value="hi">HIDE</option>
-            <option value="27648">SIEMENS S7</option>
-            <option value="32767">ALLEN BRADLEY</option>
-            <option value="4000">MITSUBISHI FX</option>
-            <option value="abraw">AB RAW 3277-16383</option>
-        </select>
-        <div id="pp" class="calc-plc-panel">
-            <div id="pr" class="calc-plc-val">0</div>
-            <div style="font-size:9.5px;color:var(--text3);margin-top:4px;" id="plcRangeDisplay"></div>
-            <label style="font-size:9px;color:var(--text3);letter-spacing:0.8px;display:block;margin-top:2px;">RAW INTEGER REGISTER</label>
-        </div>
-
-        <!-- REFERENCE TABLE -->
+        <!-- 8. REFERENCE TABLE (TOGGLE) -->
         <div class="calc-section-title">
             Reference Table 
             <label class="calc-toggle-mini" id="refTableToggle" onclick="calcToggleRefTable()">
@@ -428,61 +448,122 @@
             </div>
         </div>
 
-        <!-- PRESSURE CONVERTER -->
+        <!-- 9. TOOLS: PRESSURE CONVERTER (TOGGLE) -->
         <hr class="conv-divider">
-        <div class="calc-section-title" style="margin-top:0;">Pressure Converter</div>
-        <div class="calc-row">
-            <div class="calc-col-2">
-                <label class="calc-label">VALUE</label>
-                <input type="text" id="convInput" oninput="convertUnit()" placeholder="0.00" lang="en" inputmode="decimal" class="calc-input" style="border:2px solid var(--gold);">
+        <div class="calc-section-title" style="margin-top:0;">
+            Pressure Converter
+            <label class="calc-toggle-mini calc-toggle-off" id="convToggle" onclick="togglePressurePanel()">
+                <span class="calc-toggle-track-mini"></span>
+                <span style="font-size:9px;color:var(--text3);letter-spacing:0.6px" id="convToggleLabel">OFF</span>
+            </label>
+        </div>
+        <div id="convContent" style="display:none;">
+            <div class="calc-row">
+                <div class="calc-col-2">
+                    <label class="calc-label">VALUE</label>
+                    <input type="text" id="convInput" oninput="convertUnit()" placeholder="0.00" lang="en" inputmode="decimal" class="calc-input" style="border:2px solid var(--gold);">
+                </div>
+                <div class="calc-col">
+                    <label class="calc-label">FROM</label>
+                    <select id="convFrom" onchange="convertUnit()" class="calc-select" style="border-left:3px solid var(--gold);">
+                        <option value="bar">bar</option>
+                        <option value="mbar" selected>mbar</option>
+                        <option value="kPa">kPa</option>
+                        <option value="Pa">Pa</option>
+                        <option value="MPa">MPa</option>
+                        <option value="psi">psi</option>
+                        <option value="mmHg">mmHg</option>
+                        <option value="mmH2O">mmH₂O</option>
+                        <option value="inH2O">inH₂O</option>
+                        <option value="kgcm2">kg/cm²</option>
+                        <option value="atm">atm</option>
+                    </select>
+                </div>
+                <div class="calc-col">
+                    <label class="calc-label">TO</label>
+                    <select id="convTo" onchange="convertUnit()" class="calc-select" style="border-left:3px solid var(--gold);">
+                        <option value="kPa">kPa</option>
+                        <option value="bar">bar</option>
+                        <option value="mbar">mbar</option>
+                        <option value="Pa">Pa</option>
+                        <option value="MPa">MPa</option>
+                        <option value="psi">psi</option>
+                        <option value="mmHg">mmHg</option>
+                        <option value="mmH2O">mmH₂O</option>
+                        <option value="inH2O">inH₂O</option>
+                        <option value="kgcm2">kg/cm²</option>
+                        <option value="atm">atm</option>
+                    </select>
+                </div>
             </div>
-            <div class="calc-col">
-                <label class="calc-label">FROM</label>
-                <select id="convFrom" onchange="convertUnit()" class="calc-select" style="border-left:3px solid var(--gold);">
-                    <option value="bar">bar</option>
-                    <option value="mbar" selected>mbar</option>
-                    <option value="kPa">kPa</option>
-                    <option value="Pa">Pa</option>
-                    <option value="MPa">MPa</option>
-                    <option value="psi">psi</option>
-                    <option value="mmHg">mmHg</option>
-                    <option value="mmH2O">mmH₂O</option>
-                    <option value="inH2O">inH₂O</option>
-                    <option value="kgcm2">kg/cm²</option>
-                    <option value="atm">atm</option>
-                </select>
+            <div class="conv-result-box" id="convResultBox">
+                <span id="convResult" style="font-size:24px;">0.00</span>
+                <span id="convToUnit" style="font-family:var(--font-sans);font-size:14px;color:var(--gold);margin-top:2px;">kPa</span>
             </div>
-            <div class="calc-col">
-                <label class="calc-label">TO</label>
-                <select id="convTo" onchange="convertUnit()" class="calc-select" style="border-left:3px solid var(--gold);">
-                    <option value="kPa">kPa</option>
-                    <option value="bar">bar</option>
-                    <option value="mbar">mbar</option>
-                    <option value="Pa">Pa</option>
-                    <option value="MPa">MPa</option>
-                    <option value="psi">psi</option>
-                    <option value="mmHg">mmHg</option>
-                    <option value="mmH2O">mmH₂O</option>
-                    <option value="inH2O">inH₂O</option>
-                    <option value="kgcm2">kg/cm²</option>
-                    <option value="atm">atm</option>
-                </select>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="conv-btn-swap" onclick="swapConvUnit()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m17 2 4 4-4 4"/>
+                        <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
+                        <path d="m7 22-4-4 4-4"/>
+                        <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
+                    </svg>
+                    <span>SWAP</span>
+                </button>
             </div>
         </div>
-        <div class="conv-result-box" id="convResultBox">
-            <span id="convResult" style="font-size:24px;">0.00</span>
-            <span id="convToUnit" style="font-family:var(--font-sans);font-size:14px;color:var(--gold);margin-top:2px;">kPa</span>
+
+        <!-- 10. TOOLS: OLEOCHEMICAL DENSITY (TOGGLE) -->
+        <div class="calc-section-title">
+            Oleochemical Density
+            <label class="calc-toggle-mini calc-toggle-off" id="oleoToggle" onclick="toggleOleoPanel()">
+                <span class="calc-toggle-track-mini"></span>
+                <span style="font-size:9px;color:var(--text3);letter-spacing:0.6px" id="oleoToggleLabel">OFF</span>
+            </label>
         </div>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-            <button class="conv-btn-swap" onclick="swapConvUnit()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m17 2 4 4-4 4"/>
-                    <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
-                    <path d="m7 22-4-4 4-4"/>
-                    <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
-                </svg>
-                <span>SWAP</span>
-            </button>
+        <div id="oleoContent" style="display:none;">
+            <div class="calc-row">
+                <div class="calc-col">
+                    <label class="calc-label">Product Preset</label>
+                    <select id="oleoPreset" onchange="applyOleoPreset()" class="calc-select">
+                        <option value="custom">CUSTOM INPUT</option>
+                        <option value="cpo">CPO (50°C)</option>
+                        <option value="rbdpo">RBDPO (50°C)</option>
+                        <option value="olein">RBD PALM OLEIN (40°C)</option>
+                        <option value="stearin">RBD PALM STEARIN (60°C)</option>
+                        <option value="cpko">CPKO / PKO (40°C)</option>
+                        <option value="fa">FATTY ACID (50°C)</option>
+                        <option value="fame">FAME / BIODIESEL (40°C)</option>
+                        <option value="falc">FATTY ALCOHOL (40°C)</option>
+                        <option value="glyc">GLYCERINE (20°C)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="calc-row">
+                <div class="calc-col">
+                    <label class="calc-label">REF DENSITY (kg/m³)</label>
+                    <input type="text" id="oleoRhoRef" oninput="calcSanitizeInput(this);convertOleoDensity()" placeholder="891.0" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input" style="border:2px solid var(--gold);">
+                </div>
+                <div class="calc-col">
+                    <label class="calc-label">CEF (kg/m³·°C)</label>
+                    <input type="text" id="oleoCef" value="0.67" oninput="calcSanitizeInput(this);convertOleoDensity()" placeholder="0.67" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+            </div>
+            <div class="calc-row">
+                <div class="calc-col">
+                    <label class="calc-label">T REF (°C)</label>
+                    <input type="text" id="oleoTRef" oninput="calcSanitizeInput(this);convertOleoDensity()" placeholder="50" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+                <div class="calc-col">
+                    <label class="calc-label">T ACTUAL (°C)</label>
+                    <input type="text" id="oleoTAct" oninput="calcSanitizeInput(this);convertOleoDensity()" placeholder="Actual" lang="en" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="calc-input">
+                </div>
+            </div>
+            <div class="conv-result-box" id="oleoResultBox">
+                <span id="oleoResult" style="font-size:24px;">0.00</span>
+                <span id="oleoToUnit" style="font-family:var(--font-sans);font-size:14px;color:var(--gold);margin-top:2px;">kg/m³</span>
+                <span id="oleoSubInfo" style="display:none;font-family:var(--font-sans);font-size:10.5px;font-weight:600;color:var(--text3);margin-top:4px;"></span>
+            </div>
         </div>
 
         <button class="calc-reset" onclick="calcClr()">
@@ -763,6 +844,12 @@
             <div class="spec-formula">1 bar = 14.5038 psi = 750.062 mmHg (Torr)</div>
             <div class="spec-formula">1 bar = 10197.16 mmH₂O = 401.463 inH₂O</div>
             <div class="spec-formula">1 bar = 1.01972 kg/cm² = 0.986923 atm</div>
+            <div class="spec-section">Oleochemical Density</div>
+            <div class="spec-item">MPOB / PORIM &amp; AOCS Temperature Compensation</div>
+            <div class="spec-formula">ρ(T_act) = ρ_ref - CEF × (T_act - T_ref)</div>
+            <div class="spec-formula">ρ_g/cm³ = ρ_kg/m³ ÷ 1000 (1 g/cm³ = 1 kg/L)</div>
+            <div class="spec-item-sub">CEF ≈ 0.67–0.72 kg/(m³·°C) Oils/FAME · 0.62 Glycerine</div>
+            <div class="spec-item-sub">Presets are typical values; adjust per Lab COA</div>
             <hr class="modal-divider">
             <div class="modal-footer-note">All calculations based on international standards</div>
         </div>
@@ -771,5 +858,6 @@
 
 <script type="module" src="/src/pdfBridge.ts"></script>
 <script src="./script.js"></script>
+<script src="./oleo-density.js"></script>
 </body>
 </html>
